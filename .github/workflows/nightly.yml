@@ -1,0 +1,54 @@
+name: Nightly Engine Analysis
+
+on:
+  schedule:
+    - cron: "23 2 * * *"   # jede Nacht 02:23 UTC (04:23 deutscher Sommerzeit)
+  workflow_dispatch:
+    inputs:
+      max_games:
+        description: "Max. Partien in diesem Lauf (Backfill: z. B. 400)"
+        required: false
+        default: "150"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: engine-analysis
+  cancel-in-progress: false
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Stockfish installieren
+        run: sudo apt-get update -q && sudo apt-get install -y -q stockfish
+
+      - name: Python-Pakete
+        run: pip install --quiet chess requests
+
+      - name: Analyse laufen lassen
+        env:
+          MAX_GAMES: ${{ github.event.inputs.max_games || '150' }}
+          DEPTH: "12"
+          DEEP_DEPTH: "20"
+        run: python scripts/engine_analyze.py
+
+      - name: Ergebnis committen
+        run: |
+          git config user.name "ertucoach-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/engine.json
+          if git diff --cached --quiet; then
+            echo "Keine Änderungen."
+          else
+            git commit -m "Engine-Analyse $(date -u +%Y-%m-%d)"
+            git push
+          fi

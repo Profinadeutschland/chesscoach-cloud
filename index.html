@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ErtuCoach LIVE – AirT007</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{--bg:#0f1418;--card:#19212a;--card2:#212c38;--ink:#e9eef3;--mut:#9aa9b8;--line:#2c3a48;
+    --good:#3fb950;--warn:#e3b341;--bad:#f0563a;--acc:#4493f8;--accs:#1f6feb;--sqL:#8fa4b8;--sqD:#4a5d70;
+    --gold:#e3b341;--silver:#b8c4d0;--bronze:#c98850}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.55;font-size:15px}
+  .wrap{max-width:1080px;margin:0 auto;padding:26px 20px 64px}
+  h1{font-size:24px;margin:0 0 4px}
+  h2{font-size:19px;margin:36px 0 14px;padding-top:8px;border-top:1px solid var(--line)}
+  h3{font-size:15px;margin:16px 0 8px}
+  .sub{color:var(--mut);font-size:13.5px;margin:0}
+  p{margin:10px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:820px){.grid2,.grid3{grid-template-columns:1fr}}
+  .chartbox{position:relative;height:270px}
+  .chartbox.sm{height:225px}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes glow{0%,100%{box-shadow:0 0 22px rgba(68,147,248,.25)}50%{box-shadow:0 0 40px rgba(68,147,248,.55)}}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  /* Statusbar */
+  .status{position:sticky;top:0;z-index:60;background:rgba(15,20,24,.96);backdrop-filter:blur(6px);
+    border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:10px 0 16px;
+    display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:13px}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--good);flex:0 0 auto}
+  .dot.busy{background:var(--warn);animation:pulse 1s ease infinite}
+  .dot.err{background:var(--bad)}
+  .spinner{width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite;display:none}
+  .status button{margin-left:auto;background:var(--card2);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:5px 13px;font-size:12.5px;cursor:pointer}
+  .status button:hover{border-color:var(--acc)}
+  .pbar{flex-basis:100%;height:4px;background:var(--card2);border-radius:3px;overflow:hidden;display:none}
+  .pbar i{display:block;height:100%;background:var(--acc);width:0;transition:width .3s}
+  /* Hero */
+  .hero{background:linear-gradient(135deg,#182233 0%,#19212a 60%);border:1px solid var(--line);border-radius:16px;padding:24px;margin:14px 0;display:grid;grid-template-columns:160px 1fr;gap:22px;align-items:center;animation:rise .6s ease both}
+  @media(max-width:700px){.hero{grid-template-columns:1fr;text-align:center}}
+  .lvlBadge{width:145px;height:145px;border-radius:50%;margin:0 auto;background:conic-gradient(var(--acc) calc(var(--pct)*1%), #2c3a48 0);display:flex;align-items:center;justify-content:center;animation:glow 3s ease infinite}
+  .lvlBadge .inner{width:121px;height:121px;border-radius:50%;background:#141b24;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .lvlBadge .n{font-size:42px;font-weight:800;line-height:1;color:var(--acc)}
+  .lvlBadge .t{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+  .xpbar{height:13px;background:#2c3a48;border-radius:8px;overflow:hidden;margin:10px 0 4px}
+  .xpbar i{display:block;height:100%;background:linear-gradient(90deg,var(--accs),var(--acc));border-radius:8px;width:0;transition:width 1.2s cubic-bezier(.2,.8,.3,1)}
+  .xptxt{font-size:12.5px;color:var(--mut)}
+  .ratings{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;justify-content:inherit}
+  .ratings .r{background:var(--card2);border:1px solid var(--line);border-radius:9px;padding:6px 12px;font-size:13px}
+  .ratings b{font-size:16px}
+  .ladder{display:flex;gap:6px;margin:14px 0 6px;flex-wrap:wrap}
+  .rung{flex:1 1 96px;min-width:92px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;opacity:.55}
+  .rung.done{opacity:1;border-color:rgba(63,185,80,.5)}
+  .rung.now{opacity:1;border-color:var(--acc);box-shadow:0 0 14px rgba(68,147,248,.35);animation:pulse 2.6s ease infinite}
+  .rung .ln{font-size:10.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
+  .rung .lt{font-size:12px;font-weight:700;margin:2px 0}
+  .rung .lr{font-size:10.5px;color:var(--mut)}
+  .rung.now .ln{color:var(--acc)}
+  .gates{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:12px 0}
+  .gate{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px}
+  .gate .s{font-weight:800}
+  .gate.ok{border-left:4px solid var(--good)}
+  .gate.no{border-left:4px solid var(--bad)}
+  .up{color:var(--good)} .down{color:var(--bad)} .neut{color:var(--mut)}
+  /* Filter/KPI */
+  .fbar{border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:8px 0 14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--card)}
+  .fbar .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);font-weight:700}
+  .seg{display:flex;flex-wrap:wrap;gap:4px;background:var(--card2);border-radius:9px;padding:3px}
+  .seg button{border:0;background:transparent;color:var(--mut);font-size:12.5px;font-weight:600;padding:5px 11px;border-radius:7px;cursor:pointer}
+  .seg button.on{background:var(--accs);color:#fff}
+  .fbar .info{margin-left:auto;font-size:12px;color:var(--mut)}
+  .kpis{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 4px}
+  .kpi{flex:1 1 138px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .kpi .v{font-size:22px;font-weight:700}
+  .kpi .l{font-size:11.5px;color:var(--mut);margin-top:3px}
+  .kpi .dl{font-size:11.5px;font-weight:700;margin-top:3px}
+  /* Skills */
+  .skill{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;animation:rise .5s ease both}
+  .skill .head{display:flex;justify-content:space-between;align-items:center}
+  .skill h3{margin:0;font-size:14px}
+  .medal{font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;padding:3px 10px;border-radius:20px}
+  .m-gold{background:rgba(227,179,65,.18);color:var(--gold)}
+  .m-silber{background:rgba(184,196,208,.15);color:var(--silver)}
+  .m-bronze{background:rgba(201,136,80,.16);color:var(--bronze)}
+  .m-rot{background:rgba(240,86,58,.16);color:var(--bad)}
+  .skill .val{font-size:22px;font-weight:800;margin:8px 0 2px}
+  .skill .bar{height:7px;background:#2c3a48;border-radius:5px;overflow:hidden;margin:9px 0 7px}
+  .skill .bar i{display:block;height:100%;border-radius:5px;transition:width 1s ease}
+  .skill .next{font-size:12px;color:var(--mut)}
+  /* Heatmap */
+  .hm{display:grid;grid-template-columns:repeat(auto-fit,minmax(50px,1fr));gap:6px;margin:12px 0}
+  .hmc{border-radius:8px;padding:7px 3px;text-align:center;font-size:11px;color:#0f1418;font-weight:700;min-height:54px;display:flex;flex-direction:column;justify-content:center}
+  .hmc .h{font-size:10px;opacity:.75}
+  .hmc .s{font-size:13.5px}
+  .hmc .n{font-size:9px;opacity:.7}
+  .hmc.mut{background:#26313d !important;color:var(--mut)}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
+  th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line)}
+  th{color:var(--mut);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  .pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11.5px;font-weight:700}
+  .pg{background:rgba(63,185,80,.16);color:var(--good)}
+  .pw{background:rgba(227,179,65,.16);color:var(--warn)}
+  .pb{background:rgba(240,86,58,.16);color:var(--bad)}
+  a{color:var(--acc);text-decoration:none}
+  a:hover{text-decoration:underline}
+  /* Board */
+  .kino{display:grid;grid-template-columns:minmax(270px,390px) 1fr;gap:20px;align-items:start}
+  @media(max-width:780px){.kino{grid-template-columns:1fr}}
+  .board{position:relative;width:100%;aspect-ratio:1/1;border-radius:8px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.4);user-select:none}
+  .sq{position:absolute;width:12.5%;height:12.5%}
+  .sq.l{background:var(--sqL)} .sq.d{background:var(--sqD)}
+  .sq.hlR{box-shadow:inset 0 0 0 3px var(--bad)}
+  .sq.hlG{box-shadow:inset 0 0 0 3px var(--good)}
+  .pc{position:absolute;width:12.5%;height:12.5%;display:flex;align-items:center;justify-content:center;font-size:min(6vw,33px);line-height:1;transition:transform .55s cubic-bezier(.2,.8,.3,1),opacity .4s;z-index:2;pointer-events:none;text-shadow:0 1px 2px rgba(0,0,0,.45)}
+  .pc.w{color:#f5f0e6} .pc.b{color:#1a1e24}
+  .pc.gone{opacity:0;transform:scale(.4)}
+  .kctrl{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+  .kctrl button{background:var(--card2);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:6px 13px;font-size:13px;cursor:pointer}
+  .dots{display:flex;gap:5px;flex-wrap:wrap}
+  .dots span{width:9px;height:9px;border-radius:50%;background:var(--line);cursor:pointer}
+  .dots span.on{background:var(--acc)}
+  .exmeta{font-size:13.5px}
+  .exmeta .mv{font-weight:700;font-family:ui-monospace,Menlo,monospace}
+  .exmeta .mvbad{color:var(--bad)} .exmeta .mvgood{color:var(--good)}
+  .steplabel{display:inline-block;min-width:170px;font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--mut);margin-top:6px}
+  .catnote{font-size:12px;color:var(--mut);margin-top:6px}
+  .foot{color:var(--mut);font-size:12.5px;border-top:1px solid var(--line);margin-top:40px;padding-top:14px}
+  @media print{body{background:#fff;color:#111}.status,.fbar{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>ErtuCoach <span style="color:var(--acc)">LIVE</span></h1>
+  <p class="sub">AirT007 · Schnellschach-Fokus · aktualisiert sich bei jedem Öffnen direkt von Chess.com · Zeiten: deutsche Zeit</p>
+</header>
+
+<div class="status">
+  <span class="dot" id="stDot"></span>
+  <span class="spinner" id="stSpin"></span>
+  <span id="stTxt">Initialisiere …</span>
+  <button id="btnRefresh">↻ Jetzt aktualisieren</button>
+  <div class="pbar" id="pbar"><i id="pfill"></i></div>
+</div>
+
+<div class="hero" id="hero" style="--pct:0">
+  <div class="lvlBadge" id="lvlBadge"><div class="inner"><div class="n" id="lvlN">–</div><div class="t">Level</div></div></div>
+  <div>
+    <h1 id="lvlTitle">Lade …</h1>
+    <div class="xpbar"><i id="xpFill"></i></div>
+    <div class="xptxt" id="xpTxt"></div>
+    <div class="ratings" id="ratings"></div>
+  </div>
+</div>
+<div class="ladder" id="ladder"></div>
+
+<h2>Gates zum nächsten Level <span class="sub" id="gatesSub"></span></h2>
+<div class="gates" id="gates"></div>
+
+<h2>Rating-Verlauf Rapid <span class="sub">(letzte 90 Tage)</span></h2>
+<div class="card"><div class="chartbox"><canvas id="ratingChart"></canvas></div></div>
+
+<h2>Skills & Kennzahlen</h2>
+<div class="fbar">
+  <span class="lbl">Zeitraum</span>
+  <div class="seg" id="segDays">
+    <button data-days="7">7 T</button>
+    <button data-days="14" class="on">14 T</button>
+    <button data-days="30">30 T</button>
+    <button data-days="60">60 T</button>
+    <button data-days="0">Alles</button>
+  </div>
+  <span class="lbl">Format</span>
+  <div class="seg" id="segTc">
+    <button data-tc="r" class="on">Rapid</button>
+    <button data-tc="b">Blitz</button>
+    <button data-tc="u">Bullet</button>
+    <button data-tc="all">Alle</button>
+  </div>
+  <span class="info" id="finfo"></span>
+</div>
+<div class="kpis" id="kpis"></div>
+<p class="sub" id="cmpline"></p>
+<div class="grid3" id="skillGrid" style="margin-top:12px"></div>
+<div class="grid2" style="margin-top:6px">
+  <div class="card"><div class="chartbox"><canvas id="radar"></canvas></div></div>
+  <div class="card"><div class="chartbox"><canvas id="trendChart"></canvas></div>
+  <p class="catnote">Wochen-Trend: Hänger/100 Züge (Balken, weniger = besser) und Score % (Linie).</p></div>
+</div>
+
+<div id="engineSec" style="display:none">
+<h2>Engine-Tiefenanalyse <span class="sub" id="engineSub">(Stockfish, nächtlicher Lauf via GitHub Actions)</span></h2>
+<div class="kpis" id="engineKpis"></div>
+<div class="grid2">
+  <div class="card"><div class="chartbox sm"><canvas id="engineChart"></canvas></div>
+  <p class="catnote">ACPL = durchschnittlicher Zentibauern-Verlust pro Zug (weniger = besser). Balken: echte Engine-Blunder (≥ 200 cp Verlust) pro Partie.</p></div>
+  <div class="card"><h3 style="margin-top:0">Gröbste Engine-Blunder (60 Tage)</h3><div id="engineWorst"></div></div>
+</div>
+<p class="catnote" id="engineNote"></p>
+
+<div id="tpSec" style="display:none">
+<h2>Wendepunkte: Wo du das Spiel hättest drehen können <span class="sub">(Stockfish Tiefe 20, neueste zuerst)</span></h2>
+<p class="sub" style="margin-bottom:12px">Die Engine sucht in jeder Partie die Momente mit dem größten Umschwung – verpasste Gewinnzüge und Kollaps-Momente – und benennt das taktische Motiv in menschlicher Sprache. Rot = dein Zug, Grün = die Gewinnfolge.</p>
+<div class="card">
+  <div class="kino">
+    <div>
+      <div class="board" id="tpBoard"></div>
+      <div class="kctrl">
+        <button id="tpPrev">‹ Zurück</button>
+        <button id="tpPlay">Pause</button>
+        <button id="tpNext">Weiter ›</button>
+        <div class="dots" id="tpDots"></div>
+      </div>
+      <span class="steplabel" id="tpStepLbl"></span>
+    </div>
+    <div class="exmeta" id="tpMeta"></div>
+  </div>
+</div>
+<div class="card" id="motifStats"></div>
+</div>
+</div>
+
+<h2>Die typischen Fallen zwischen 600 und 1000 Elo <span class="sub">(dein Jagdrevier – in beide Richtungen)</span></h2>
+<div class="grid2">
+  <div class="card">
+    <h3 style="margin-top:0">1 · Die hängende Figur & der Rückschlag-Reflex</h3>
+    <p style="font-size:13.5px">Der mit Abstand häufigste Spielentscheider bis 1000: Eine Figur steht ungedeckt und wird übersehen – oft direkt nach einem Abtausch, weil „automatisch" zurückgeschlagen wird, ohne zu zählen. <b>Gegenmittel:</b> Nach JEDEM Schlagzug (deinem und seinem) einmal zählen: Wer schlägt zuletzt? <b>Als Waffe:</b> Deine Bestrafungsquote (aktuell ~59 %) ist hier der direkteste Rating-Hebel.</p>
+    <h3>2 · Die Springergabel</h3>
+    <p style="font-size:13.5px">Springer auf <b>c7/c2</b> (König + Turm), <b>f7/f2</b> und <b>e6/e3</b> – die Familiengabel auf König und Dame entscheidet auf diesem Level ganze Abende. <b>Gegenmittel:</b> Bevor du König und Dame (oder König und Turm) auf Springer-kompatible Felder stellst: ein Blick auf gegnerische Springer im 2-Zug-Radius.</p>
+    <h3>3 · Der f7/f2-Überfall</h3>
+    <p style="font-size:13.5px">Schäfermatt-Versuche (Dame + Läufer auf f7) und Fried-Liver-Ideen (Sxf7) – bis ~800 probiert das fast jeder Zweite mit Weiß. <b>Gegenmittel:</b> Früh rochieren (machst du inzwischen in 78 %!), bei früher Dame des Gegners: g6/Nf6 kennen statt panisch Bauern schieben.</p>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">4 · Das Grundreihenmatt</h3>
+    <p style="font-size:13.5px">Rochiert, alle drei Bauern noch vor dem König, Schwerfiguren getauscht – und plötzlich Ra8#. Passiert in beide Richtungen ständig. <b>Gegenmittel:</b> Ab dem Mittelspiel ein „Luftloch" (h3/h6) einplanen, sobald Türme auf offene Linien kommen. <b>Als Waffe:</b> Prüfe bei jeder offenen Linie, ob seine Grundreihe nur einfach gedeckt ist.</p>
+    <h3>5 · Der vergessene Zwischenzug</h3>
+    <p style="font-size:13.5px">„Ich schlage, er schlägt zurück" – und dazwischen kommt ein Schach oder Gegenangriff, der alles ändert. Auf 600–1000 wird fast immer in „Ich-dann-er"-Paaren gerechnet. <b>Gegenmittel:</b> Bei jedem geplanten Abtausch kurz fragen: „Hat er ein Schach oder einen Angriff DAZWISCHEN?"</p>
+    <h3>6 · Der Autopilot in Gewinnstellung</h3>
+    <p style="font-size:13.5px">Dein persönliches Muster laut Daten: Die groben Einsteller passieren mit +3 oder mehr auf dem Brett und über 3 Minuten auf der Uhr – nicht in Zeitnot. Führung macht nachlässig. <b>Gegenmittel:</b> Sobald du klar gewinnst, bewusst LANGSAMER werden: „Gewonnene Stellungen gewinnt man durch Vorsicht."</p>
+  </div>
+</div>
+
+<h2>Beste & schlechteste Spielzeiten <span class="sub">(Rapid, letzte 60 Tage)</span></h2>
+<div class="card">
+  <div class="hm" id="hourMap"></div>
+  <div id="slotAdvice"></div>
+</div>
+<div class="grid2">
+  <div class="card"><h3 style="margin-top:0">Score nach Partie-Nr. in der Session</h3>
+    <div class="chartbox sm"><canvas id="sessChart"></canvas></div>
+    <p class="catnote" id="sessNote"></p></div>
+  <div class="card"><h3 style="margin-top:0">Score nach Wochentag <span style="color:var(--mut);font-weight:400">(Rapid, 60 T)</span></h3>
+    <div class="chartbox sm"><canvas id="wdChart"></canvas></div></div>
+</div>
+
+<h2>Fehler-Kino <span class="sub">(teuerste Momente aus verlorenen Rapid-Partien der letzten 30 Tage)</span></h2>
+<div class="card">
+  <div class="kino">
+    <div>
+      <div class="board" id="board"></div>
+      <div class="kctrl">
+        <button id="bPrev">‹ Zurück</button>
+        <button id="bPlay">Pause</button>
+        <button id="bNext">Weiter ›</button>
+        <div class="dots" id="dots"></div>
+      </div>
+      <span class="steplabel" id="stepLbl"></span>
+    </div>
+    <div class="exmeta" id="exMeta"></div>
+  </div>
+</div>
+
+<h2>Letzte Partien</h2>
+<div class="card" id="lastGames"></div>
+
+<div class="foot">
+  <p><b>So funktioniert diese Seite:</b> Beim Öffnen lädt sie deine neuesten Partien direkt von der öffentlichen Chess.com-API, analysiert nur die neuen Partien im Browser (Netto-Abtauschbewertung/SEE, Schwelle ≥ 3 Bauerneinheiten, ohne Engine) und merkt sich alles im Browser-Speicher (localStorage). 795 Partien seit dem 08.04.2026 sind als Startpaket eingebaut. Kein Server, keine Datenbank – löschst du den Browser-Speicher, analysiert sie beim nächsten Mal neu ab Startpaket. Accuracy-Werte stammen von Chess.com (nur bei Partien mit Game Review vorhanden). Level: L1 &lt;250 · L2 250–400 · L3 400–550 · L4 550–700 · L5 700–900 · L6 900–1200 · L7 1200–1600 · L8 1600–2000 · L9 &gt;2000 (Rapid).</p>
+  <p id="cacheInfo"></p>
+</div>
+
+</div>
+<script>
+window.SEED = {"maxTs":1784625570,"dict":["Kings-Pawn-Opening-Kings-Knight-Variation","Bishops-Opening-Berlin-Defense","Three-Knights-Opening","Alekhines-Defense-Scandinavian-Variation","Vienna-Game-Omaha-Gambit","Queens-Pawn-Opening","Kings-Pawn-Opening","Nimzowitsch-Defense","Scandinavian-Defense","Queens-Pawn-Opening-Zukertort-Chigorin-Variat","French-Defense-Tarrasch-Guimard-Defense","Caro-Kann-Defense","Scandinavian-Defense-Closed","Vienna-Game-Falkbeer-Stanley-Variation","Kings-Gambit-Accepted-Schallopp-Defense","Queens-Pawn-Opening-Levitsky-Attack","Englund-Gambit","Vienna-Game-Falkbeer-Vienna-Gambit","Vienna-Game-Max-Lange-Vienna-Gambit","Vienna-Game","Queens-Pawn-Opening-Accelerated-London-System","Philidor-Defense-Nimzowitsch-Variation","Undefined","Four-Knights-Game-Italian-Variation","Bishops-Opening","Caro-Kann-Defense-Accelerated-Panov-Attack","Queens-Gambit-Declined-Albin-Countergambit","Queens-Pawn-Opening-Chigorin-Variation","Queens-Gambit-Declined-Austrian-Variation","Birds-Opening-Dutch-Variation","Grob-Opening","Reti-Opening-Polish-Defense","Van-Geet-Opening","Kings-Pawn-Opening-Leonardis-Variation","Scotch-Game","Center-Game","Philidor-Defense","Reti-Opening-Dutch-Variation","Queens-Pawn-Opening-Krause-Variation","Petrovs-Defense","Alekhines-Defense","Queens-Pawn-Opening-Accelerated-London-Steini","Pirc-Defense","Queens-Pawn-Opening-Chigorin-Irish-Gambit","Nimzowitsch-Defense-Kennedy-Linksspringer-Var","Van-t-Kruijs-Opening","Reti-Opening","French-Defense-Classical-Burn-Variation","French-Defense-Queens-Knight-Variation","Italian-Game-Knight-Attack-Normal-Variation","Vienna-Game-Anderssen-Defense","Vienna-Game-Falkbeer-Variation","Kings-Pawn-Opening-Kings-Knight-Pachman-Wing-","Kings-Gambit-Accepted-Kings-Knight-Gambit","Vienna-Game-Max-Lange-Defense","Closed-Sicilian-Defense","Queens-Gambit-Declined-Queens-Knight-Variatio","Sicilian-Defense","Pirc-Defense-Maroczy-Defense","Modern-Defense-Standard-Pseudo-Austrian-Attac","Mieses-Opening-Reversed-Rat-Variation","Nimzowitsch-Defense-Declined-Williams-Variati","Queens-Pawn-Opening-English-Rat-Defense","Owens-Defense","Old-Benoni-Defense-Semi-Benoni-Variation-Bloc","Nimzowitsch-Larsen-Attack-Modern-Variation","Nimzowitsch-Defense-Scandinavian-Bogoljubov-V","Kings-Gambit-Accepted-Bishops-Gambit-Cozio-De","Pirc-Defense-Harmonist-Variation","Clemenz-Opening","Closed-Sicilian-Defense-Traditional-Line","Queens-Gambit-Accepted-Central-Variation-Alek","English-Opening-Reversed-Sicilian-Variation","Caro-Kann-Defense-Advance-Variation","Closed-Sicilian-Defense-Grand-Prix-Variation","Ponziani-Opening-Jaenisch-Counterattack","Caro-Kann-Defense-Classical-Variation","Kings-Gambit-Declined-Keene-Defense","Ponziani-Opening-Ponziani-Countergambit","Birds-Opening","Philidor-Defense-Hanham-Schlechter-Variation","French-Defense-Classical-Steinitz-Variation","Kings-Gambit-Declined-Classical-Variation","Ponziani-Opening","Kings-Fianchetto-Opening","Bishops-Opening-Berlin-Spielmann-Attack","Old-Benoni-Defense","Queens-Pawn-Opening-Horwitz-Defense","Vienna-Game-Max-Lange-Steinitz-Gambit","Queens-Pawn-Opening-Tartakower-Variation","Pirc-Defense-Modern-Defense-Geller-System","Nimzowitsch-Larsen-Attack","Kings-Fianchetto-Opening-Reversed-Modern-Defe","Bishops-Opening-Berlin-Vienna-Hybrid-Variatio","French-Defense-Steinitz-Attack","French-Defense","Saragossa-Opening","French-Defense-Knight-Variation","French-Defense-Reti-Spielmann-Attack","French-Defense-Normal-Variation","Vienna-Game-Main-Line","Bishops-Opening-Boi-Variation","Polish-Opening","Sicilian-Defense-McDonnell-Attack","Caro-Kann-Defense-Panov-Attack","Kings-Gambit","Dutch-Defense","French-Defense-Kings-Indian-Attack","Indian-Game-Tartakower-Defense","Kings-Pawn-Opening-St-George-Defense","Ruy-Lopez-Opening-Old-Steinitz-Defense","French-Defense-La-Bourdonnais-Variation","Nimzowitsch-Defense-French-Connection-Variati","Old-Benoni-Defense-Schmid-Variation","Indian-Game","Pirc-Defense-Lions-Jaw-Variation","Queens-Pawn-Opening-Mikenas-Lithuanian-Variat","French-Defense-Exchange-Variation","Old-Indian-Defense","French-Defense-Knight-Variation-Two-Knights-V","Scotch-Game-Scotch-Gambit-Dubois-Reti-Advance","Nimzowitsch-Defense-Kennedy-Variation","Four-Knights-Game-Spanish-Variation-Classical","Italian-Game-Two-Knights-Open","Center-Game-Accepted-Normal-Variation","Scandinavian-Defense-Mieses-Kotrc-Variation","Caro-Kann-Defense-Two-Knights-Attack","Giuoco-Piano-Game","Mieses-Opening","Petrovs-Defense-Three-Knights-Game","Giuoco-Piano-Game-Four-Knights-Game","Nimzowitsch-Larsen-Attack-Classical-Variation","Nimzowitsch-Defense-Kennedy-Keres-Attack","Italian-Game","Caro-Kann-Defense-Breyer-Variation","Caro-Kann-Defense-Goldman-Variation","Vienna-Game-Falkbeer-Mieses-Erben-Gambit","Queens-Pawn-Opening-Zukertort-Variation","Caro-Kann-Defense-Exchange-Variation","Caro-Kann-Defense-Advance-Botvinnik-Carls-Def","French-Defense-St-George-Defense","Four-Knights-Game-Scotch-Variation-Accepted","Modern-Defense-with","Petrovs-Defense-Classical-Variation","Pirc-Defense-Main-Line-Kholmov-System","Sicilian-Defense-Smith-Morra-Gambit","Four-Knights-Game-Scotch-Variation","Queens-Gambit-Declined","Queens-Pawn-Opening-Blackmar-Diemer-Lemberger","Reti-Opening-Slav-Invitation","Caro-Kann-Defense-Advance-Short-Variation-wit","Giuoco-Piano-Game-Giuoco-Pianissimo-Italian-F","Caro-Kann-Defense-Main-Line","London-System","Pirc-Defense-Classical-Variation"],"rows":[["04-08","b","b","l",124,64.4,99,3,2,1,2,0,0,2,1,8,15,26,"e",1,1,0,0,0,22,3,11333],["04-17","u","b","l",100,null,35,3,4,0,2,14,0,3,0,8,9,0,"m",0,1,0,1,3,9,5,23520],["04-17","u","w","l",100,null,34,1,0,0,0,0,0,1,0,8,9,0,"m",0,1,0,2,1,10,5,23571],["04-17","u","b","w",147,null,26,0,1,1,1,0,0,0,0,8,5,0,"m",12,0,1,3,0,10,5,23573],["04-17","u","w","l",103,null,44,2,0,1,0,43,0,2,0,8,14,0,"m",0,1,0,4,2,17,5,23965],["04-17","u","b","w",143,60.6,50,0,0,0,0,28,0,0,0,8,17,0,"m",0,0,0,5,0,17,5,23968],["04-19","b","b","l",100,56.6,57,3,5,4,4,0,1,2,0,8,20,0,"m",2,1,0,1,1,20,0,27018],["04-19","u","w","l",110,null,24,2,1,0,1,0,1,1,0,8,4,0,"m",17,0,0,6,0,21,0,27085],["04-21","u","w","l",100,null,40,5,3,1,3,29,0,5,0,8,12,0,"m",0,1,0,7,5,19,2,29837],["04-22","u","b","w",129,69.3,34,0,1,2,1,32,0,0,0,8,9,0,"m",10,0,0,8,0,11,3,30825],["04-22","u","b","l",104,null,31,0,1,0,1,0,0,0,0,8,7,0,"m",2,1,0,8,0,11,3,30828],["04-22","u","w","w",123,60.6,47,1,0,1,0,29,0,1,0,8,16,0,"m",10,0,0,9,0,11,3,30830],["04-22","u","w","l",100,null,42,1,1,0,1,29,0,1,0,8,13,0,"m",1,1,0,10,1,11,3,30834],["04-22","u","b","l",100,65.6,39,0,0,0,0,24,0,0,0,8,11,0,"m",13,0,0,2,0,11,3,30835],["04-22","u","w","w",120,51,37,0,0,1,0,15,0,0,0,8,11,0,"m",7,0,0,11,0,11,3,30839],["04-22","u","b","w",140,50.2,30,0,0,2,0,0,0,0,0,8,7,0,"m",10,0,0,8,0,12,3,30843],["04-22","u","w","w",158,78.2,33,1,2,3,1,17,0,1,0,8,9,0,"m",19,0,0,12,0,12,3,30846],["04-22","u","b","l",141,null,37,2,0,0,0,22,0,2,0,8,10,0,"m",6,1,0,9,2,12,3,30873],["04-22","u","b","l",123,null,15,0,0,1,0,0,0,0,0,7,0,0,"o",11,1,0,13,0,13,3,30921],["04-22","u","w","w",140,71.8,43,1,1,1,1,23,0,1,0,8,14,0,"m",1,0,0,14,1,18,3,31212],["04-22","u","b","l",125,null,29,0,2,0,2,0,0,0,0,8,6,0,"m",6,1,0,15,0,23,3,31513],["04-22","u","w","l",109,56,56,1,2,1,2,25,0,1,0,8,15,5,"e",1,1,0,12,1,23,3,31515],["04-22","u","w","w",123,74.8,39,4,1,1,1,29,1,3,0,8,12,0,"m",14,0,0,12,0,23,3,31518],["04-23","u","b","l",112,78.6,31,1,5,1,4,0,0,1,0,8,7,0,"m",3,1,0,16,1,0,3,31609],["04-23","u","w","l",100,null,34,0,0,1,0,21,0,0,0,8,9,0,"m",0,1,0,17,0,0,3,31612],["04-23","u","b","l",100,null,29,0,0,0,0,22,0,0,0,8,6,0,"m",3,1,0,8,0,13,4,32392],["04-23","u","w","w",112,70.5,29,0,1,1,0,19,0,0,0,8,7,0,"m",19,0,0,17,0,13,4,32394],["04-23","u","w","w",125,null,27,1,3,1,3,0,0,1,0,8,6,0,"m",10,0,0,16,0,13,4,32397],["04-23","u","w","w",137,null,45,4,0,1,0,29,0,4,0,8,15,0,"m",2,0,0,18,1,13,4,32399],["04-23","u","b","l",127,null,37,1,1,1,1,0,0,1,0,8,10,0,"m",2,1,0,6,0,14,4,32401],["04-23","u","w","l",119,63.4,28,2,1,1,0,27,0,2,0,8,6,0,"m",21,1,0,19,0,14,4,32403],["04-23","u","b","l",108,null,31,3,2,0,2,0,0,3,0,8,7,0,"m",3,1,0,20,3,14,4,32408],["04-23","u","w","w",118,76.9,37,1,1,1,1,19,0,1,0,8,11,0,"m",8,0,0,21,0,14,4,32410],["04-23","u","b","l",109,45.7,37,2,4,1,3,20,0,2,0,8,10,0,"m",1,1,0,5,2,14,4,32448],["04-24","u","w","w",119,35.6,33,3,4,1,2,0,0,3,0,8,9,0,"m",1,0,0,18,3,10,5,33613],["04-24","u","b","l",109,null,35,0,0,1,0,20,0,0,0,8,9,0,"m",1,1,0,9,0,22,5,34361],["04-24","u","w","w",119,null,37,1,1,1,0,0,0,1,0,8,11,0,"m",4,0,0,17,1,22,5,34363],["04-24","u","b","w",128,54.8,32,4,2,3,1,26,0,4,0,8,8,0,"m",26,0,0,22,0,22,5,34365],["04-24","u","b","l",119,null,27,0,0,1,0,0,0,0,0,8,5,0,"m",10,1,0,23,0,22,5,34368],["04-24","u","b","l",110,null,31,2,0,0,0,26,0,2,0,8,7,0,"m",1,1,1,24,2,22,5,34370],["04-24","u","w","w",118,43.2,47,2,0,0,0,0,0,2,0,8,16,0,"m",4,0,0,14,1,22,5,34372],["04-24","u","b","w",127,79.9,30,0,0,1,0,0,0,0,0,8,7,0,"m",13,0,0,25,0,22,5,34377],["04-24","u","w","l",119,55,34,0,0,0,0,13,0,0,0,8,9,0,"m",1,1,0,7,0,23,5,34380],["04-24","u","b","w",127,37.8,30,4,0,0,0,0,0,4,0,8,7,0,"m",6,0,0,8,4,23,5,34382],["04-24","u","w","w",135,50.7,47,0,2,2,1,29,0,0,0,8,16,0,"m",6,0,0,26,0,23,5,34385],["04-24","u","b","w",143,71,34,0,0,0,0,0,0,0,0,8,9,0,"m",10,0,0,8,0,23,5,34387],["04-24","u","w","l",135,null,18,0,0,0,0,0,0,0,0,8,1,0,"m",4,1,0,27,0,23,5,34390],["04-24","u","w","l",128,null,34,5,2,0,2,0,1,4,0,8,9,0,"m",5,1,0,28,1,23,5,34392],["04-25","u","w","l",121,47.2,34,2,1,3,0,21,0,2,0,8,9,0,"m",1,1,0,18,2,1,5,34537],["04-25","u","b","l",113,null,19,1,0,0,0,0,1,0,0,8,1,0,"m",3,1,0,29,1,1,5,34539],["04-25","u","w","l",105,null,40,6,4,0,4,0,0,6,0,8,12,0,"m",1,1,0,6,3,1,5,34541],["04-25","u","b","l",100,null,57,1,4,3,3,40,0,1,0,8,19,1,"e",1,1,0,30,1,1,5,34543],["04-25","u","w","w",109,null,27,0,1,2,1,9,0,0,0,8,6,0,"m",35,0,0,31,0,1,5,34544],["04-25","u","b","w",118,60.4,28,0,2,0,2,22,0,0,0,8,6,0,"m",12,0,1,32,0,1,5,34545],["04-25","u","b","l",110,42.9,27,2,1,0,1,0,1,1,0,8,5,0,"m",3,1,0,33,1,16,6,35417],["04-25","u","b","w",118,62.8,50,1,4,3,4,0,0,1,0,8,17,0,"m",7,0,0,34,0,16,6,35421],["04-25","u","w","l",111,null,40,2,0,0,0,21,0,2,0,8,12,0,"m",2,1,1,19,1,20,6,35683],["04-25","u","w","l",103,null,28,0,0,2,0,0,0,0,0,8,6,0,"m",17,0,1,34,0,20,6,35685],["04-25","u","b","l",100,75.8,43,1,0,2,0,38,0,1,0,8,13,0,"m",1,1,0,12,0,20,6,35687],["04-25","u","b","w",108,null,32,0,0,1,0,0,0,0,0,8,8,0,"m",24,0,1,27,0,20,6,35690],["04-25","u","w","w",116,null,23,1,1,1,1,0,1,0,0,8,4,0,"m",17,0,0,0,0,20,6,35692],["04-25","u","b","l",109,69.4,35,0,0,3,0,0,0,0,0,8,9,0,"m",1,1,0,5,0,20,6,35694],["04-25","u","b","l",101,81.5,51,0,0,2,0,0,0,0,0,8,14,3,"e",1,1,0,35,0,20,6,35697],["04-25","u","w","l",100,null,40,3,1,2,1,0,0,3,0,8,12,0,"m",0,1,0,18,3,21,6,35701],["04-25","u","w","l",100,null,16,1,0,0,0,0,1,0,0,8,0,0,"o",9,1,1,0,0,22,6,35805],["04-25","u","w","l",100,49.3,26,0,0,1,0,0,0,0,0,8,5,0,"m",2,1,1,36,0,22,6,35807],["04-25","u","b","w",108,null,30,0,0,1,0,22,0,0,0,8,7,0,"m",11,0,0,37,0,23,6,35834],["04-25","u","w","w",116,null,29,0,0,0,0,11,0,0,0,8,7,0,"m",6,0,0,2,0,23,6,35836],["04-25","u","b","l",108,null,25,0,0,0,0,0,0,0,0,8,4,0,"m",6,1,0,38,0,23,6,35839],["04-25","u","b","l",100,61.7,39,0,0,1,0,20,0,0,0,8,11,0,"m",2,1,0,6,0,23,6,35841],["04-25","u","w","l",100,null,42,0,0,3,0,0,0,0,0,8,13,0,"m",0,1,0,39,0,23,6,35844],["04-25","u","w","w",108,null,39,4,0,2,0,0,1,3,0,8,12,0,"m",4,0,0,40,2,23,6,35846],["04-25","u","b","l",101,null,37,3,0,3,0,0,0,3,0,8,10,0,"m",1,1,0,41,3,23,6,35848],["04-25","u","b","l",100,83.8,41,2,0,1,0,20,0,2,0,8,12,0,"m",1,1,0,1,2,23,6,35850],["04-25","u","w","w",108,null,25,1,0,0,0,17,0,1,0,8,5,0,"m",31,0,0,17,0,23,6,35852],["04-25","u","w","w",116,null,15,0,0,0,0,0,0,0,0,8,0,0,"o",44,0,0,4,0,23,6,35853],["04-25","u","b","w",124,89.2,30,1,0,2,0,0,0,1,0,8,7,0,"m",14,0,0,42,0,23,6,35855],["04-25","u","b","w",131,null,40,2,2,2,2,32,0,2,0,8,12,0,"m",0,0,0,9,2,23,6,35859],["04-26","u","w","l",124,null,50,3,2,1,0,13,0,3,0,8,15,2,"e",0,1,0,11,3,23,0,37261],["04-30","u","w","w",132,58.1,29,1,1,0,1,29,0,1,0,8,7,0,"m",15,0,0,17,1,9,4,42206],["04-30","u","w","w",140,28.8,37,3,3,4,2,13,1,2,0,8,11,0,"m",2,0,0,19,2,9,4,42208],["04-30","u","b","l",132,null,47,1,0,1,0,44,0,1,0,8,15,0,"m",0,1,0,43,1,9,4,42211],["04-30","u","b","w",140,17.6,32,2,2,1,1,0,1,1,0,8,8,0,"m",10,0,0,44,0,9,4,42213],["04-30","u","w","w",148,41.3,43,2,6,2,5,29,0,2,0,8,14,0,"e",2,0,0,18,1,9,4,42216],["04-30","u","b","l",140,null,37,1,0,1,0,0,0,1,0,8,10,0,"m",1,1,1,34,1,9,4,42227],["04-30","u","w","l",133,null,44,3,1,1,1,23,0,3,0,8,14,0,"m",2,0,1,17,1,9,4,42229],["04-30","u","b","l",127,null,41,0,0,0,0,16,0,0,0,8,12,0,"m",12,0,0,8,0,9,4,42231],["04-30","u","w","w",138,60.1,43,0,0,2,0,27,0,0,0,8,14,0,"m",10,0,0,18,0,9,4,42233],["04-30","u","b","w",146,null,30,2,0,1,0,0,0,2,0,8,7,0,"m",3,0,0,2,2,20,4,42888],["05-01","u","b","w",154,null,20,0,2,1,1,0,0,0,0,8,2,0,"m",8,0,1,0,0,16,5,44056],["05-01","u","w","w",162,89.6,35,0,0,4,0,0,0,0,0,8,10,0,"m",4,0,1,12,0,16,5,44058],["05-01","u","b","l",154,null,47,4,2,0,1,0,0,4,0,8,15,0,"m",0,0,0,5,3,16,5,44062],["05-01","u","w","w",162,69.2,29,1,0,0,0,0,0,1,0,8,7,0,"m",24,0,0,4,0,16,5,44063],["05-01","u","b","w",170,64,12,0,0,1,0,0,0,0,0,6,0,0,"o",51,0,0,1,0,16,5,44067],["05-01","u","b","w",178,null,2,0,0,0,0,0,0,0,0,1,0,0,"o",59,0,0,45,0,16,5,44068],["05-01","u","w","l",169,65,44,3,2,1,2,33,0,3,0,8,14,0,"m",1,1,0,4,1,16,5,44070],["05-01","u","w","w",177,68.2,57,4,4,2,4,19,0,3,1,8,16,5,"e",8,0,0,17,1,16,5,44073],["05-01","u","b","l",169,null,37,5,0,3,0,16,2,3,0,8,10,0,"m",9,1,0,24,2,16,5,44079],["05-01","u","b","l",161,44.3,49,3,3,2,0,0,1,2,0,8,16,0,"m",1,1,0,37,0,16,5,44082],["05-01","u","w","l",153,null,38,2,0,1,0,21,0,2,0,8,11,0,"m",7,1,0,18,1,16,5,44085],["05-01","b","b","w",130,null,22,2,1,0,1,0,1,1,0,8,3,0,"m",144,0,1,6,0,16,5,44087],["05-01","b","w","w",155,49,41,2,3,2,3,0,0,2,0,8,13,0,"m",16,0,1,12,0,16,5,44093],["05-01","b","b","w",179,null,44,5,4,0,1,20,0,5,0,8,14,0,"m",8,0,0,37,3,17,5,44102],["05-01","b","w","w",203,null,19,1,0,0,0,0,0,1,0,8,2,0,"m",113,0,0,4,0,17,5,44105],["05-01","b","b","w",225,90.4,28,0,2,2,2,16,0,0,0,8,6,0,"m",93,0,1,46,0,17,5,44109],["05-01","b","b","w",244,81.4,40,0,0,1,0,20,0,0,0,8,12,0,"m",15,0,0,5,0,17,5,44117],["05-01","b","w","l",224,60.5,32,1,2,2,1,23,0,1,0,8,8,0,"m",4,1,0,7,1,17,5,44150],["05-01","b","w","w",242,67.2,27,4,0,0,0,21,4,0,0,8,6,0,"m",73,0,0,47,0,17,5,44154],["05-01","b","b","w",259,61.1,18,1,0,0,0,0,1,0,0,8,1,0,"m",113,0,1,33,0,17,5,44156],["05-01","b","b","w",275,70.6,42,0,2,1,2,0,0,0,0,8,13,0,"m",58,0,0,2,0,21,5,44360],["05-01","b","w","l",260,80.1,52,1,0,2,0,21,0,1,0,8,18,0,"m",5,1,0,19,1,21,5,44372],["05-01","b","w","w",276,null,11,0,0,1,0,0,0,0,0,6,0,0,"o",159,0,0,48,0,21,5,44374],["05-01","b","b","w",290,65.9,22,0,1,1,1,0,0,0,0,8,3,0,"m",136,0,0,6,0,21,5,44376],["05-01","b","w","l",276,null,32,1,0,0,0,19,0,1,0,8,8,0,"m",5,1,0,18,0,21,5,44383],["05-01","b","b","l",263,null,47,5,0,0,0,0,0,5,0,8,15,0,"m",3,1,0,49,3,22,5,44411],["05-01","b","b","l",250,null,39,4,0,1,0,0,0,4,0,8,11,0,"m",1,1,0,5,3,22,5,44429],["05-02","u","w","w",161,null,37,2,1,2,0,0,0,2,0,8,11,0,"m",1,0,0,50,1,9,6,45099],["05-02","u","w","l",153,67.3,50,0,0,2,0,0,0,0,0,8,17,0,"m",1,1,0,17,0,9,6,45102],["05-02","u","b","l",144,null,39,5,2,1,1,0,1,4,0,8,11,0,"m",6,0,1,2,3,9,6,45105],["05-02","u","w","l",136,69.1,38,2,0,2,0,0,1,1,0,8,11,0,"m",1,1,0,12,1,12,6,45249],["05-02","u","w","w",143,94.1,29,0,2,4,2,0,0,0,0,8,7,0,"m",34,0,0,19,0,12,6,45252],["05-02","u","b","l",136,null,23,2,0,0,0,0,0,2,0,8,3,0,"m",4,1,0,51,2,15,6,45453],["05-02","u","b","w",144,null,20,0,1,0,1,0,0,0,0,8,2,0,"m",43,0,1,8,0,15,6,45455],["05-02","u","w","l",136,null,36,4,2,2,1,35,1,3,0,8,10,0,"m",4,1,1,17,2,15,6,45457],["05-02","u","b","l",129,null,39,2,0,1,0,36,1,1,0,8,11,0,"m",0,1,1,52,1,15,6,45459],["05-02","u","w","w",138,74.1,33,0,0,1,0,0,0,0,0,8,9,0,"m",8,0,0,17,0,15,6,45461],["05-02","u","b","l",130,73,39,1,1,0,0,28,0,1,0,8,11,0,"m",1,1,0,20,0,15,6,45467],["05-02","u","w","l",122,null,42,2,0,1,0,25,0,2,0,8,13,0,"m",1,1,0,18,1,15,6,45469],["05-02","u","w","l",114,null,28,3,1,0,1,0,0,3,0,8,6,0,"m",1,1,0,53,2,15,6,45471],["05-02","u","b","l",106,null,47,6,1,0,1,30,0,6,0,8,15,0,"m",1,1,1,8,5,15,6,45473],["05-02","b","b","w",262,21.1,38,3,3,0,3,28,1,2,0,8,11,0,"m",110,0,0,33,0,15,6,45477],["05-02","b","w","w",275,77.8,69,1,0,2,0,43,0,1,0,8,27,0,"m",17,0,1,17,0,16,6,45484],["05-02","b","b","l",264,null,29,2,0,0,0,16,1,1,0,8,6,0,"m",8,1,0,54,0,16,6,45492],["05-02","u","w","w",114,null,2,0,0,0,0,0,0,0,0,1,0,0,"o",60,0,0,42,0,17,6,45592],["05-02","u","w","l",106,null,28,2,1,1,1,21,0,2,0,8,6,0,"m",3,1,1,7,2,17,6,45594],["05-02","u","b","l",100,null,23,1,2,0,2,0,0,1,0,8,3,0,"m",0,1,1,5,1,17,6,45597],["05-02","u","b","w",108,76.4,8,0,0,0,0,0,0,0,0,4,0,0,"o",41,0,0,0,0,18,6,45601],["05-02","u","w","l",100,null,36,5,6,1,5,33,0,5,0,8,10,0,"m",1,1,1,12,4,18,6,45604],["05-02","u","b","l",100,4.7,19,1,2,1,2,0,1,0,0,8,1,0,"m",13,0,1,6,0,18,6,45651],["05-02","u","w","l",100,82.4,26,0,1,1,1,0,0,0,0,8,5,0,"m",1,1,0,55,0,18,6,45653],["05-02","u","w","l",100,null,40,3,2,2,1,21,0,3,0,8,12,0,"m",1,1,0,14,1,18,6,45656],["05-02","u","w","l",100,null,8,0,0,0,0,0,0,0,0,4,0,0,"o",48,0,0,12,0,18,6,45657],["05-03","u","b","l",100,77.6,27,0,0,0,0,0,0,0,0,8,5,0,"m",0,1,0,56,0,9,0,46533],["05-03","u","b","w",108,74.1,36,1,1,3,1,14,0,1,0,8,10,0,"m",7,0,0,56,0,9,0,46536],["05-03","u","b","l",100,40.9,25,1,0,0,0,0,0,1,0,8,4,0,"m",3,1,0,48,1,17,0,46994],["05-03","u","w","l",100,null,8,0,0,0,0,0,0,0,0,4,0,0,"o",46,0,0,3,0,17,0,46995],["05-03","u","b","l",100,null,37,2,1,3,0,0,0,2,0,8,10,0,"m",1,1,1,20,2,17,0,46997],["05-03","u","b","w",108,66.2,18,0,0,1,0,0,0,0,0,8,1,0,"m",8,0,0,42,0,23,0,47396],["05-03","u","w","w",116,70.6,21,0,1,0,0,0,0,0,0,8,3,0,"m",30,0,1,57,0,23,0,47398],["05-04","u","b","l",109,63.1,21,1,0,0,0,0,0,1,0,8,2,0,"m",1,1,0,58,1,0,0,47401],["05-04","u","b","l",103,null,23,1,0,0,0,0,0,1,0,8,3,0,"m",2,1,0,45,1,0,0,47403],["05-04","u","w","w",111,null,15,0,0,0,0,0,0,0,0,8,0,0,"o",50,0,0,59,0,0,0,47404],["05-04","u","w","w",120,76.5,55,0,0,0,0,0,0,0,0,8,15,5,"e",0,0,0,17,0,0,0,47406],["05-04","b","w","l",253,28.9,86,5,6,1,5,21,0,5,0,8,35,0,"m",0,1,0,42,2,20,1,48644],["05-05","u","b","w",128,87.1,18,0,0,1,0,10,0,0,0,8,1,0,"m",24,0,0,5,0,1,1,48912],["05-05","u","w","l",121,null,44,1,2,2,2,31,0,1,0,8,12,2,"e",0,1,0,4,1,1,1,48915],["05-05","u","b","l",113,null,47,1,2,1,0,22,0,1,0,8,15,0,"m",1,1,1,60,1,1,1,48917],["05-05","u","w","w",121,72.3,31,0,0,0,0,0,0,0,0,8,8,0,"m",13,0,0,61,0,1,1,48919],["05-05","b","b","w",262,null,0,0,0,0,0,0,0,0,0,0,0,0,"o",null,0,0,22,0,12,2,49599],["05-05","b","w","l",252,59.5,50,4,0,0,0,29,0,4,0,8,17,0,"m",74,0,0,12,0,12,2,49605],["05-05","b","b","l",243,null,33,4,0,2,0,0,1,3,0,8,8,0,"m",106,0,1,2,0,12,2,49608],["05-05","u","b","w",129,67.9,30,3,1,2,1,18,1,2,0,8,7,0,"m",7,0,0,5,1,18,2,49952],["05-05","u","w","w",137,92.2,31,0,1,1,0,29,0,0,0,8,8,0,"m",27,0,0,4,0,18,2,49958],["05-05","u","b","l",129,30.6,7,0,0,0,0,0,0,0,0,3,0,0,"o",53,0,0,42,0,22,2,50196],["05-05","u","w","l",121,88.5,32,0,0,0,0,29,0,0,0,8,8,0,"m",2,1,0,18,0,22,2,50198],["05-05","u","w","w",129,81.5,36,0,0,1,0,31,0,0,0,8,10,0,"m",16,0,0,18,0,22,2,50202],["05-05","u","w","l",121,null,26,1,0,0,0,0,0,1,0,8,5,0,"m",2,1,0,7,1,22,2,50206],["05-05","u","b","l",113,null,35,4,5,3,2,30,0,4,0,8,9,0,"m",1,1,0,42,4,23,2,50227],["05-05","u","b","l",105,51,37,1,0,1,0,0,0,1,0,8,10,0,"m",0,1,0,42,0,23,2,50229],["05-05","u","w","w",113,49.4,37,1,1,2,1,0,0,1,0,8,11,0,"m",4,0,0,17,1,23,2,50232],["05-05","u","b","w",122,41,38,3,0,0,0,18,0,3,0,8,11,0,"m",6,0,1,2,1,23,2,50236],["05-05","b","w","w",251,null,165,5,5,5,3,0,0,5,0,8,20,55,"e",46,0,0,7,0,23,2,50250],["05-05","u","b","l",116,null,29,1,0,0,0,0,1,0,0,8,6,0,"m",3,1,0,22,0,23,2,50255],["05-05","u","w","l",108,null,44,0,2,1,2,0,0,0,0,8,14,0,"m",2,1,1,17,0,23,2,50257],["05-05","u","b","w",116,null,50,0,2,1,1,10,0,0,0,8,17,0,"m",3,0,0,32,0,23,2,50259],["05-05","u","w","l",109,null,48,4,1,1,1,0,1,3,0,8,16,0,"m",1,1,0,55,2,23,2,50261],["05-05","u","w","l",107,null,52,1,1,2,1,0,0,1,0,8,18,0,"m",1,1,0,19,1,23,2,50264],["05-05","u","b","l",100,null,39,0,3,1,2,32,0,0,0,8,11,0,"m",1,1,0,62,0,23,2,50266],["05-06","b","b","l",242,null,67,2,0,1,0,0,0,2,0,8,25,0,"m",1,1,1,45,0,18,3,51417],["05-06","b","w","l",237,null,32,3,0,0,0,0,0,3,0,8,8,0,"m",117,0,0,18,0,18,3,51419],["05-06","u","b","w",110,null,32,1,2,1,2,0,1,0,0,8,8,0,"m",4,0,0,42,0,19,3,51423],["05-06","u","w","l",107,null,42,2,0,0,0,33,0,2,0,8,13,0,"m",3,1,0,18,1,19,3,51425],["05-06","u","w","l",100,null,24,0,2,1,2,0,0,0,0,8,4,0,"m",6,1,0,19,0,19,3,51427],["05-06","u","b","l",100,null,23,1,0,0,0,0,1,0,0,8,3,0,"m",16,0,0,36,0,19,3,51428],["05-06","u","w","l",100,null,30,1,0,0,0,15,0,1,0,8,7,0,"m",3,1,0,63,1,19,3,51430],["05-06","u","b","l",100,null,37,4,1,0,1,16,0,4,0,8,10,0,"m",3,0,0,42,4,19,3,51432],["05-06","u","b","w",108,null,34,2,0,0,0,34,0,2,0,8,9,0,"m",17,0,0,64,0,19,3,51434],["05-06","u","b","l",101,null,33,1,0,0,0,24,0,1,0,8,8,0,"m",6,1,0,5,1,19,3,51436],["05-06","u","b","l",100,null,45,1,0,0,0,0,0,1,0,8,14,0,"m",0,1,0,65,1,19,3,51438],["05-07","u","w","l",100,68.9,38,3,0,0,0,19,0,3,0,8,11,0,"m",0,1,0,12,3,0,3,51721],["05-07","u","w","l",100,null,34,0,4,1,0,23,0,0,0,8,9,0,"m",1,1,1,66,0,0,3,51724],["05-07","u","b","l",100,28.6,7,0,0,0,0,0,0,0,0,3,0,0,"o",54,0,0,42,0,0,3,51724],["05-07","u","w","l",100,null,32,3,1,0,0,29,0,3,0,8,8,0,"m",2,1,1,24,3,0,3,51727],["05-07","u","w","l",100,45.6,40,0,0,0,0,19,0,0,0,8,12,0,"m",1,1,0,67,0,0,3,51729],["05-07","u","b","w",108,86.7,14,0,0,1,0,0,0,0,0,7,0,0,"o",38,0,0,42,0,0,3,51730],["05-07","u","w","w",116,55.3,33,1,1,1,0,23,0,1,0,8,9,0,"m",7,0,0,4,1,0,3,51733],["05-07","u","b","w",124,35.6,38,4,4,0,4,30,0,4,0,8,11,0,"m",9,0,0,5,4,0,3,51736],["05-07","u","b","w",131,36,30,1,4,2,4,14,0,1,0,8,7,0,"m",1,0,0,42,1,0,3,51741],["05-07","u","b","l",124,null,25,1,0,0,0,14,0,1,0,8,4,0,"m",2,1,0,68,1,0,3,51743],["05-07","b","w","w",246,56.3,69,1,1,0,0,0,0,1,0,8,27,0,"m",31,0,0,4,0,0,3,51749],["05-07","b","b","l",236,41.8,53,5,2,2,2,24,0,5,0,8,18,0,"m",3,1,1,43,1,0,3,51756],["05-07","b","w","l",227,null,78,2,2,3,1,25,0,2,0,8,26,5,"e",1,1,0,4,0,0,3,51762],["05-07","b","w","l",218,null,62,7,0,0,0,27,1,6,0,8,23,0,"m",2,1,1,19,3,0,3,51768],["05-07","b","b","w",226,74.3,56,1,1,2,1,14,0,1,0,8,20,0,"m",17,0,0,69,0,9,4,52320],["05-07","b","w","l",218,39.7,42,2,6,2,2,41,0,2,0,8,13,0,"m",13,1,0,17,0,10,4,52327],["05-07","b","b","l",210,null,39,3,0,0,0,30,0,3,0,8,11,0,"m",5,1,0,42,1,10,4,52335],["05-07","b","w","w",218,81.3,41,0,0,5,0,0,0,0,0,8,13,0,"m",67,0,0,18,0,10,4,52339],["05-07","u","b","l",116,null,29,2,0,0,0,24,1,1,0,8,6,0,"m",5,1,0,36,1,10,4,52343],["05-07","u","b","l",108,47.1,43,0,1,2,0,0,0,0,0,8,13,0,"m",0,1,0,21,0,10,4,52345],["05-07","b","w","w",226,76.6,35,0,0,2,0,19,0,0,0,8,10,0,"m",185,0,0,11,0,16,4,52681],["05-08","b","w","w",234,63,35,0,0,0,0,13,0,0,0,8,10,0,"m",173,0,0,19,0,0,4,53199],["05-08","b","w","w",242,75.5,63,0,0,1,0,27,0,0,0,8,24,0,"m",5,0,0,18,0,0,4,53211],["05-08","b","b","w",250,51.3,60,1,1,3,1,0,0,1,0,8,22,0,"m",74,0,0,42,0,0,4,53220],["05-08","u","w","l",100,null,20,0,1,0,1,0,0,0,0,8,2,0,"m",9,0,0,50,0,1,4,53225],["05-08","u","b","w",109,89.2,28,0,0,3,0,0,0,0,0,8,6,0,"m",26,0,0,42,0,1,4,53227],["05-08","b","b","l",242,null,51,3,0,0,0,0,0,3,0,8,17,0,"m",141,0,0,58,0,2,5,53281],["05-08","b","w","l",234,67.3,112,1,2,0,2,17,0,0,1,8,27,21,"m",42,0,0,12,0,2,5,53289],["05-08","b","b","l",226,57.4,35,0,1,0,1,20,0,0,0,8,9,0,"m",200,0,0,58,0,2,5,53299],["05-08","b","w","w",234,85.3,53,0,1,1,1,25,0,0,0,8,19,0,"m",25,0,0,18,0,2,5,53309],["05-08","b","b","w",242,71.5,48,0,1,3,0,0,0,0,0,8,16,0,"m",117,0,0,70,0,2,5,53319],["05-08","b","w","w",250,71.4,39,0,0,2,0,29,0,0,0,8,12,0,"m",188,0,0,71,0,16,5,54127],["05-09","b","b","l",242,null,45,4,0,2,0,28,0,4,0,8,14,0,"m",15,0,0,38,1,13,6,55413],["05-09","b","b","l",234,48.7,41,4,0,0,0,18,0,4,0,8,12,0,"m",8,1,0,72,1,17,6,55669],["05-09","b","w","w",242,85.9,27,0,0,0,0,25,0,0,0,8,6,0,"m",208,0,0,19,0,18,6,55687],["05-09","u","w","w",117,44.6,35,5,1,0,0,33,1,4,0,8,10,0,"m",4,0,0,48,4,18,6,55693],["05-09","r","w","l",416,66.3,46,1,0,1,0,19,0,1,0,8,15,0,"m",306,0,0,19,0,19,6,55791],["05-09","r","b","w",462,48.9,74,1,1,1,1,0,0,1,0,8,29,0,"m",161,0,1,73,0,20,6,55809],["05-09","r","w","l",422,58,58,5,1,0,1,31,0,5,0,8,21,0,"m",167,0,0,74,0,20,6,55826],["05-09","r","b","l",383,null,31,3,1,0,1,0,0,3,0,8,7,0,"m",352,0,0,57,0,20,6,55834],["05-10","b","w","l",234,49.5,64,2,3,1,2,23,0,2,0,8,16,8,"e",3,1,0,75,0,10,0,56640],["05-10","b","b","w",240,74.6,24,1,0,1,0,0,0,1,0,8,4,0,"m",209,0,0,73,0,10,0,56645],["05-10","b","b","w",248,76.5,48,1,1,3,1,0,0,1,0,8,16,0,"m",60,0,1,76,0,10,0,56655],["05-10","b","w","l",239,60.1,24,2,0,0,0,0,1,1,0,8,4,0,"m",210,0,0,77,0,21,0,57334],["05-10","b","w","l",230,84.9,108,4,1,4,1,39,1,3,0,8,28,18,"e",0,1,0,4,0,22,0,57387],["05-11","b","b","w",238,60,52,2,1,0,0,30,0,2,0,8,18,0,"m",5,0,0,78,1,8,1,58006],["05-12","b","w","w",246,87.1,43,0,2,2,1,27,0,0,0,8,14,0,"m",48,0,0,48,0,9,2,59465],["05-12","r","b","w",416,53.8,66,1,6,4,6,0,0,1,0,8,25,0,"m",161,0,0,36,0,11,2,59586],["05-12","r","w","w",442,64.4,27,0,0,1,0,0,0,0,0,8,6,0,"m",463,0,0,17,0,11,2,59591],["05-12","b","b","w",254,53.6,42,1,0,1,0,36,0,1,0,8,13,0,"m",125,0,0,79,0,21,2,60222],["05-12","b","w","l",246,56.2,36,1,3,0,2,0,0,1,0,8,10,0,"m",0,1,0,17,1,22,2,60280],["05-13","u","w","w",125,76.4,51,3,3,2,3,0,0,3,0,8,18,0,"m",9,0,0,4,1,6,3,60747],["05-13","u","b","l",117,61.1,47,2,0,1,0,0,0,2,0,8,15,0,"m",1,1,0,80,2,9,3,60911],["05-13","r","b","w",468,60.5,35,0,0,0,0,0,0,0,0,8,9,0,"m",395,0,0,2,0,16,3,61359],["05-13","b","b","w",254,63.3,64,1,0,3,0,10,0,1,0,8,24,0,"m",71,0,0,42,0,16,3,61372],["05-13","b","w","l",246,54.6,54,3,1,0,1,0,0,3,0,8,19,0,"m",5,1,0,17,1,17,3,61384],["05-13","r","w","l",443,69.2,28,0,0,2,0,17,0,0,0,8,6,0,"m",442,0,0,27,0,17,3,61394],["05-13","r","b","l",417,74.1,123,8,2,1,2,0,1,6,1,8,35,18,"m",91,0,0,3,0,17,3,61411],["05-13","r","w","d",417,56.3,115,4,0,5,0,43,0,4,0,8,27,23,"e",16,0,0,6,0,17,3,61432],["05-13","r","b","w",438,43,98,9,1,3,1,0,0,9,0,8,41,0,"m",114,0,0,42,0,18,3,61454],["05-13","r","b","w",459,78.2,34,0,3,0,3,0,0,0,0,8,9,0,"m",504,0,0,46,0,18,3,61468],["05-13","b","w","l",238,66.6,74,4,2,2,1,25,0,4,0,8,29,0,"m",70,0,0,17,0,18,3,61480],["05-13","b","b","w",246,60.6,70,1,0,3,0,0,0,1,0,8,27,0,"m",16,0,0,42,0,18,3,61491],["05-13","b","b","w",254,80.9,62,0,2,1,2,18,0,0,0,8,23,0,"m",55,0,0,19,0,19,3,61502],["05-13","b","w","w",262,49.1,79,5,1,1,1,17,0,5,0,8,27,5,"e",8,0,0,81,1,19,3,61515],["05-13","b","b","w",270,72.9,38,0,0,0,0,0,0,0,0,8,11,0,"m",131,0,0,36,0,20,3,61587],["05-13","b","w","l",262,null,72,6,3,0,3,15,0,6,0,8,28,0,"m",0,0,0,3,4,20,3,61598],["05-13","r","w","d",460,62.1,109,4,1,1,1,21,0,4,0,8,32,15,"e",173,0,0,14,0,21,3,61636],["05-13","b","w","w",270,53,61,1,0,1,0,37,0,1,0,8,23,0,"m",57,0,0,82,0,23,3,61781],["05-13","b","b","l",262,45.2,49,2,3,1,3,44,0,2,0,8,16,0,"m",0,1,0,83,1,23,3,61795],["05-14","b","w","l",254,null,62,2,2,0,2,27,0,2,0,8,23,0,"m",1,1,0,17,0,0,3,61803],["05-14","b","w","w",262,100,15,0,0,1,0,0,0,0,0,8,0,0,"o",151,0,1,17,0,0,3,61805],["05-14","b","b","l",254,30.6,7,0,0,0,0,0,0,0,0,3,0,0,"o",179,0,0,42,0,0,3,61810],["05-14","b","b","w",262,64.1,32,1,1,2,0,32,0,1,0,8,8,0,"m",84,0,0,84,0,0,3,61815],["05-14","b","w","w",270,52.7,59,0,5,0,5,25,0,0,0,8,22,0,"m",10,0,0,11,0,0,3,61823],["05-14","u","b","w",125,null,40,3,1,0,1,28,0,3,0,8,12,0,"m",1,0,0,38,2,18,4,62908],["05-14","u","w","w",133,66,37,0,2,3,2,0,0,0,0,8,11,0,"m",23,0,0,19,0,18,4,62910],["05-14","u","w","l",125,null,40,1,2,2,0,0,0,1,0,8,12,0,"m",3,1,0,14,1,18,4,62913],["05-14","u","b","w",133,null,32,0,0,0,0,22,0,0,0,8,8,0,"m",14,0,0,83,0,18,4,62915],["05-14","u","b","w",141,54.9,30,1,5,1,5,0,0,1,0,8,7,0,"m",12,0,0,22,0,18,4,62917],["05-14","u","b","w",150,null,32,0,0,0,0,18,0,0,0,8,8,0,"m",5,0,0,2,0,18,4,62934],["05-14","u","w","l",143,null,28,1,0,0,0,0,0,1,0,8,6,0,"m",7,1,0,12,1,21,4,63110],["05-14","u","b","w",151,78.3,6,0,0,0,0,0,0,0,0,3,0,0,"o",57,0,0,42,0,22,4,63170],["05-14","u","w","l",143,null,38,0,0,0,0,13,0,0,0,8,11,0,"m",2,1,0,17,0,23,4,63216],["05-14","u","w","w",151,null,9,0,0,0,0,0,0,0,0,5,0,0,"o",36,0,0,50,0,23,4,63218],["05-14","u","b","l",143,57.3,31,5,2,1,2,0,0,5,0,8,7,0,"m",5,1,0,36,5,23,4,63220],["05-14","u","w","w",150,null,47,1,2,4,2,0,0,1,0,8,16,0,"m",1,0,0,18,1,23,4,63222],["05-15","u","b","w",158,67.6,18,1,0,2,0,0,1,0,0,8,1,0,"m",39,0,1,57,0,8,5,63767],["05-15","u","w","l",149,null,46,3,2,0,2,19,0,3,0,8,15,0,"m",0,1,0,19,2,8,5,63770],["05-15","u","b","w",157,null,56,3,1,1,0,0,0,3,0,8,20,0,"m",3,0,0,57,0,8,5,63773],["05-15","u","b","l",149,null,43,1,0,0,0,0,0,1,0,8,13,0,"m",2,1,0,30,1,8,5,63775],["05-15","u","b","w",156,null,26,1,2,1,2,0,0,1,0,8,5,0,"m",19,0,0,45,0,8,5,63777],["05-15","u","w","l",147,18.4,40,0,0,0,0,19,0,0,0,8,12,0,"m",0,1,0,6,0,8,5,63779],["05-15","u","w","w",155,86.3,29,0,0,2,0,13,0,0,0,8,7,0,"m",27,0,0,48,0,8,5,63780],["05-15","u","b","w",163,45.8,40,1,0,1,0,32,0,1,0,8,12,0,"m",15,0,0,5,0,9,5,63782],["05-15","u","w","l",155,null,44,3,8,0,6,0,2,1,0,8,14,0,"m",2,1,0,85,1,9,5,63785],["05-15","u","b","w",163,65.9,20,0,0,1,0,10,0,0,0,8,2,0,"m",48,0,1,61,0,9,5,63786],["05-15","u","w","w",171,42.7,35,3,4,2,1,15,0,3,0,8,10,0,"m",15,0,0,54,0,9,5,63788],["05-15","u","w","w",179,null,45,2,0,0,0,15,0,2,0,8,15,0,"m",6,0,0,70,1,9,5,63791],["05-15","u","w","w",187,null,37,4,3,0,1,13,0,4,0,8,11,0,"m",6,0,0,42,2,9,5,63793],["05-15","u","b","w",195,83.8,70,3,2,4,2,0,0,3,0,8,27,0,"m",1,0,0,61,3,9,5,63797],["05-15","u","w","w",202,null,45,1,2,1,0,17,0,1,0,8,15,0,"m",9,0,0,6,1,9,5,63800],["05-15","u","b","l",195,null,73,3,0,0,0,24,0,3,0,8,22,6,"m",0,1,0,19,1,9,5,63802],["05-15","u","b","w",203,85.6,22,0,0,1,0,0,0,0,0,8,3,0,"m",33,0,1,42,0,9,5,63804],["05-15","u","w","w",211,null,45,3,0,0,0,19,0,3,0,8,15,0,"m",3,0,0,17,3,21,5,64512],["05-16","u","b","l",203,null,43,2,0,0,0,12,0,2,0,8,13,0,"m",1,1,1,36,1,0,5,64682],["05-16","u","w","l",195,null,56,1,5,1,2,27,0,1,0,8,20,0,"m",1,1,0,11,0,8,6,65215],["05-16","u","b","l",188,null,59,8,3,0,2,0,0,8,0,8,21,0,"m",0,1,0,42,6,8,6,65217],["05-16","u","b","w",197,60.6,66,5,1,1,1,22,0,5,0,8,25,0,"m",4,0,0,22,2,8,6,65220],["05-16","u","b","w",206,null,48,8,5,2,5,0,0,8,0,8,16,0,"m",7,0,0,36,4,9,6,65222],["05-16","u","w","l",198,null,48,0,0,0,0,0,0,0,0,8,16,0,"m",0,1,0,12,0,14,6,65566],["05-16","u","b","l",190,74.6,53,3,2,2,1,16,0,3,0,8,18,0,"m",0,1,0,42,1,14,6,65568],["05-16","u","w","w",198,64.1,41,1,0,2,0,19,0,1,0,8,13,0,"m",20,0,0,66,0,14,6,65570],["05-16","u","b","w",206,null,56,0,1,1,1,38,0,0,0,8,20,0,"m",5,0,0,5,0,14,6,65572],["05-16","u","w","l",198,null,44,2,1,1,1,33,0,2,0,8,14,0,"m",1,1,0,3,2,14,6,65576],["05-16","u","b","w",205,36.5,68,11,0,1,0,60,0,11,0,8,26,0,"m",2,0,0,86,3,14,6,65578],["05-16","u","b","l",197,89.4,45,3,2,2,2,22,0,3,0,8,14,0,"m",3,1,0,42,3,15,6,65631],["05-16","u","b","l",189,null,45,1,0,0,0,26,0,1,0,8,14,0,"m",2,1,0,42,1,15,6,65634],["05-16","u","w","w",197,59.7,29,0,3,1,3,11,0,0,0,8,7,0,"m",44,0,0,7,0,15,6,65635],["05-16","u","w","w",205,null,61,9,8,3,6,0,0,9,0,8,23,0,"m",1,0,0,4,3,15,6,65638],["05-16","r","b","l",441,null,7,0,0,0,0,0,0,0,0,3,0,0,"o",595,0,0,6,0,15,6,65639],["05-16","r","w","l",424,null,8,0,0,0,0,0,0,0,0,4,0,0,"o",591,0,0,14,0,15,6,65639],["05-16","r","b","l",409,null,49,7,1,1,1,0,5,2,0,8,15,1,"e",444,0,1,42,0,16,6,65646],["05-16","r","b","l",396,null,22,2,0,0,0,0,2,0,0,8,3,0,"m",542,0,1,6,0,16,6,65648],["05-16","r","w","w",414,50.1,55,1,0,2,0,47,0,1,0,8,20,0,"m",274,0,0,19,0,16,6,65657],["05-16","r","b","w",430,67.9,52,5,2,2,2,20,3,2,0,8,18,0,"m",278,0,1,6,0,16,6,65670],["05-16","r","w","w",445,57.9,43,0,0,2,0,31,0,0,0,8,14,0,"m",434,0,1,87,0,16,6,65675],["05-16","r","b","w",458,79.9,50,0,1,0,1,28,0,0,0,8,17,0,"m",469,0,0,6,0,16,6,65681],["05-16","r","b","l",444,52,47,1,1,2,0,20,0,1,0,8,15,0,"m",331,0,1,6,0,16,6,65689],["05-16","r","w","w",456,93.2,23,0,3,0,2,0,0,0,0,8,4,0,"m",521,0,0,19,0,16,6,65692],["05-16","b","w","l",262,58.3,58,1,3,1,2,33,0,1,0,8,21,0,"m",1,1,0,88,1,22,6,66032],["05-16","b","w","w",270,81.9,55,1,3,2,3,25,0,1,0,8,20,0,"m",76,0,0,17,0,22,6,66038],["05-16","b","b","l",262,null,65,8,1,0,1,22,0,8,0,8,24,0,"m",11,0,0,6,1,22,6,66049],["05-16","b","w","l",254,33.6,28,3,0,0,0,0,0,3,0,8,6,0,"m",126,0,0,12,0,22,6,66051],["05-16","b","b","l",246,40.5,43,2,0,3,0,0,0,2,0,8,13,0,"m",15,0,0,42,0,22,6,66058],["05-16","b","b","w",254,84.7,58,1,4,1,4,26,0,1,0,8,21,0,"m",30,0,0,5,0,23,6,66063],["05-16","b","w","l",246,27.6,56,8,2,1,0,43,0,8,0,8,20,0,"m",4,1,0,3,3,23,6,66072],["05-16","b","w","l",238,null,58,2,2,1,0,35,0,2,0,8,21,0,"m",2,1,0,63,2,23,6,66079],["05-16","r","w","d",456,null,116,3,6,4,4,19,0,2,1,8,26,24,"e",65,0,0,17,0,23,6,66104],["05-16","b","b","w",246,71.2,30,0,2,2,1,18,0,0,0,8,7,0,"m",159,0,0,5,0,23,6,66109],["05-16","b","b","l",238,null,29,0,0,0,0,20,0,0,0,8,6,0,"m",134,0,0,42,0,23,6,66115],["05-16","b","b","w",246,null,34,2,1,3,1,0,0,2,0,8,9,0,"m",241,0,0,36,0,23,6,66117],["05-17","b","w","l",239,56.9,64,5,0,2,0,0,0,5,0,8,24,0,"m",0,1,0,18,3,0,6,66127],["05-17","b","b","w",247,41.5,66,4,5,4,4,48,0,4,0,8,25,0,"m",12,0,0,89,0,10,0,66755],["05-17","b","b","w",255,69,42,3,0,0,0,28,0,3,0,8,13,0,"m",32,0,0,34,0,10,0,66766],["05-17","b","w","w",263,60.9,39,0,0,1,0,0,0,0,0,8,12,0,"m",96,0,0,19,0,10,0,66776],["05-17","b","b","w",271,74.7,72,0,0,0,0,0,0,0,0,8,19,9,"m",79,0,0,42,0,11,0,66789],["05-17","b","w","w",279,79.5,49,1,1,3,1,21,0,1,0,8,17,0,"m",81,0,0,2,0,16,0,67111],["05-17","b","b","w",287,63.8,116,1,0,1,0,18,0,0,1,8,25,25,"m",26,0,1,1,0,16,0,67123],["05-17","u","w","w",213,62.7,39,1,2,1,2,27,0,1,0,8,12,0,"m",2,0,0,17,1,18,0,67206],["05-17","b","b","w",296,59.7,62,2,2,2,2,32,0,2,0,8,23,0,"m",1,0,0,58,1,20,0,67329],["05-17","b","w","l",288,49.8,46,4,1,0,1,13,0,4,0,8,15,0,"m",81,0,0,54,0,22,0,67440],["05-17","b","w","w",296,90.3,32,0,0,1,0,17,0,0,0,8,8,0,"m",143,0,0,50,0,22,0,67469],["05-17","b","b","d",296,72.9,161,2,0,1,0,26,0,2,0,8,16,56,"e",1,0,0,42,0,22,0,67481],["05-17","b","b","l",288,59.6,51,3,1,2,1,28,0,3,0,8,17,0,"m",1,0,0,30,2,22,0,67493],["05-19","b","w","w",296,null,25,1,1,1,1,17,1,0,0,8,5,0,"m",102,0,0,12,0,0,1,69028],["05-19","b","b","w",304,73.8,90,4,2,4,2,32,0,4,0,8,29,8,"m",3,0,0,62,2,0,1,69034],["05-19","b","w","d",304,65.6,120,1,1,4,1,33,0,1,0,8,19,33,"e",0,0,0,19,0,10,2,69641],["05-19","b","w","l",296,null,54,1,2,0,1,31,0,1,0,8,19,0,"m",2,1,0,54,0,22,2,70342],["05-19","b","w","w",304,32.7,41,3,3,1,0,0,1,2,0,8,13,0,"m",146,0,0,18,0,22,2,70346],["05-20","b","b","l",297,null,21,0,0,0,0,0,0,0,0,8,2,0,"m",211,0,0,42,0,9,3,70992],["05-20","b","w","l",289,73.6,90,5,1,0,1,31,0,5,0,8,27,10,"e",8,1,0,19,0,9,3,71001],["05-20","b","b","l",282,53.1,31,1,0,0,0,22,1,0,0,8,7,0,"m",176,0,0,36,0,11,3,71115],["05-20","b","b","w",292,65.7,62,1,3,2,2,18,0,1,0,8,23,0,"m",9,0,0,90,0,11,3,71126],["05-20","b","b","l",284,null,49,3,0,1,0,0,0,3,0,8,16,0,"m",80,0,0,2,0,11,3,71139],["05-20","b","w","w",292,62.9,61,2,2,2,1,37,0,2,0,8,23,0,"m",38,0,0,19,0,11,3,71148],["05-20","b","w","w",300,55.7,25,0,1,0,1,0,0,0,0,8,5,0,"m",165,0,0,54,0,11,3,71155],["05-20","b","w","l",292,66.7,94,1,0,0,0,29,0,1,0,8,24,15,"m",30,0,0,17,0,12,3,71166],["05-20","b","b","w",300,81.2,30,0,0,1,0,22,0,0,0,8,7,0,"m",227,0,0,91,0,21,3,71760],["05-20","b","b","w",308,77.2,24,0,1,0,1,18,0,0,0,8,4,0,"m",225,0,0,36,0,22,3,71765],["05-20","b","b","l",300,57.1,35,1,0,0,0,0,0,1,0,8,9,0,"m",162,0,0,42,0,22,3,71770],["05-20","b","w","w",308,81,73,0,0,3,0,23,0,0,0,8,29,0,"m",54,0,0,50,0,22,3,71780],["05-21","b","w","l",300,null,42,2,0,0,0,0,0,2,0,8,13,0,"m",204,0,0,17,0,22,4,73222],["05-22","b","b","w",308,89.1,62,0,0,3,0,0,0,0,0,8,23,0,"m",138,0,0,87,0,10,5,73938],["05-22","b","w","w",316,55.2,29,0,0,1,0,0,0,0,0,8,7,0,"m",205,0,0,14,0,10,5,73943],["05-22","b","b","l",307,57.7,83,5,1,2,1,0,0,5,0,8,33,0,"m",2,1,0,92,4,10,5,73952],["05-22","b","w","w",315,68.9,71,2,1,1,1,11,0,2,0,8,28,0,"m",134,0,0,42,0,10,5,73963],["05-22","b","b","w",324,67.3,64,5,0,3,0,0,0,5,0,8,24,0,"m",55,0,0,7,0,11,5,73983],["05-22","b","w","w",332,71.6,49,0,2,0,2,19,0,0,0,8,17,0,"m",56,0,0,48,0,11,5,73996],["05-22","b","b","w",340,74.7,38,0,0,3,0,24,0,0,0,8,11,0,"m",110,0,0,5,0,11,5,74004],["05-22","b","w","w",348,89.5,11,0,0,1,0,0,0,0,0,6,0,0,"o",278,0,0,48,0,18,5,74432],["05-22","b","b","w",355,65.4,50,1,2,1,2,26,0,1,0,8,17,0,"m",87,0,0,45,0,18,5,74441],["05-22","b","w","l",347,null,86,4,1,0,1,21,0,4,0,8,27,8,"e",13,0,0,54,0,21,5,74600],["05-22","b","w","l",339,null,80,4,1,1,0,27,1,3,0,8,32,0,"m",2,0,0,18,0,21,5,74609],["05-23","b","w","l",331,null,50,2,1,0,0,41,1,1,0,8,17,0,"m",18,0,0,93,0,9,6,75333],["05-23","b","b","w",339,65.7,48,0,2,1,2,0,0,0,0,8,16,0,"m",121,0,0,94,0,9,6,75346],["05-23","b","b","l",331,53.4,45,0,1,0,1,18,0,0,0,8,14,0,"m",15,1,0,95,0,22,6,76137],["05-23","b","b","l",323,43.1,47,5,0,0,0,0,0,5,0,8,15,0,"m",102,0,0,96,0,23,6,76175],["05-23","b","w","l",315,64.4,68,1,1,3,1,19,0,1,0,8,26,0,"m",6,1,0,19,0,23,6,76184],["05-24","b","w","l",307,null,12,1,0,0,0,0,1,0,0,6,0,0,"o",256,0,1,12,0,0,6,76224],["05-24","b","b","l",299,76.4,35,1,1,2,0,0,0,1,0,8,9,0,"m",145,0,0,36,0,0,6,76228],["05-24","b","b","w",306,66.4,86,2,3,2,2,0,0,2,0,8,28,7,"e",14,0,0,87,0,0,6,76238],["05-24","b","b","w",314,76.7,62,1,3,4,3,30,0,1,0,8,23,0,"m",115,0,0,97,0,0,6,76247],["05-24","b","w","w",322,90.7,35,0,0,1,0,25,0,0,0,8,10,0,"m",197,0,0,18,0,0,6,76253],["05-24","b","b","w",331,null,62,6,2,1,1,0,0,6,0,8,23,0,"m",11,0,1,5,0,1,6,76263],["05-24","b","w","l",323,57,30,1,0,0,0,17,0,1,0,8,7,0,"m",206,0,0,63,0,1,6,76266],["05-24","b","w","l",315,null,60,6,2,1,2,13,0,6,0,8,22,0,"m",1,1,0,19,2,1,6,76276],["05-24","b","w","l",307,null,40,1,0,0,0,0,0,1,0,8,12,0,"m",89,0,0,12,0,1,6,76288],["05-24","b","b","l",299,39.7,79,0,6,1,5,28,0,0,0,8,31,0,"m",0,1,1,42,0,8,0,76716],["05-24","b","b","w",307,79.1,40,1,0,0,0,18,1,0,0,8,12,0,"m",163,0,0,42,0,9,0,76778],["05-24","b","w","l",299,null,60,1,1,0,0,31,0,1,0,8,22,0,"m",7,0,0,18,1,20,0,77424],["05-24","b","w","l",291,null,50,7,1,1,1,0,2,5,0,8,17,0,"m",2,1,0,14,2,22,0,77527],["05-24","b","b","l",283,53.2,73,2,0,0,0,12,0,0,2,8,22,6,"e",1,1,0,98,2,22,0,77533],["05-24","b","b","w",291,81.4,54,2,2,5,2,16,0,2,0,8,19,0,"m",15,0,0,42,0,22,0,77539],["05-25","b","w","l",283,null,84,9,2,0,2,0,1,8,0,8,34,0,"m",2,1,0,14,3,10,1,78276],["05-25","b","w","l",275,60.8,50,4,2,1,1,35,0,4,0,8,17,0,"m",8,0,0,48,0,14,1,78480],["05-25","b","b","l",266,54.5,53,5,1,2,0,0,0,5,0,8,18,0,"m",1,1,0,57,4,14,1,78488],["05-25","b","b","l",258,56.7,15,1,0,0,0,0,1,0,0,7,0,0,"o",236,0,0,6,0,17,1,78672],["05-25","b","w","w",266,66.9,39,0,3,3,3,33,0,0,0,8,12,0,"m",117,0,0,3,0,17,1,78679],["05-25","b","b","w",274,73.5,86,7,1,2,1,0,0,7,0,8,25,10,"e",2,0,0,21,1,18,1,78723],["05-25","b","w","w",282,79.3,43,1,0,1,0,23,0,1,0,8,14,0,"m",116,0,0,99,0,19,1,78800],["05-26","b","w","w",290,83.4,15,0,0,0,0,0,0,0,0,8,0,0,"o",268,0,0,100,0,9,2,79638],["05-26","b","b","w",299,49.5,76,4,0,2,0,0,0,4,0,8,30,0,"m",12,0,0,42,0,9,2,79649],["05-26","b","b","w",307,74.9,40,1,1,4,1,24,0,1,0,8,12,0,"m",104,0,0,19,0,10,2,79702],["05-26","b","w","w",315,85.2,47,0,0,1,0,33,0,0,0,8,16,0,"m",102,0,1,40,0,13,2,79865],["05-26","b","w","w",323,62.9,29,0,0,0,0,0,0,0,0,8,7,0,"m",110,0,0,19,0,13,2,79905],["05-26","b","b","l",315,74,57,2,0,3,0,30,0,2,0,8,20,0,"m",6,1,1,1,0,14,2,79962],["05-26","b","w","l",306,63.9,50,3,1,0,1,19,0,3,0,8,14,3,"e",25,0,0,17,0,23,2,80506],["05-27","b","b","w",314,77.2,102,0,5,4,5,0,0,0,0,8,43,0,"m",16,0,0,5,0,17,3,81545],["05-28","b","w","w",322,53,25,2,1,0,1,0,0,2,0,8,5,0,"m",202,0,0,101,0,9,4,82532],["05-28","b","b","l",314,75.5,43,1,1,0,0,0,0,1,0,8,13,0,"m",56,0,0,36,0,13,4,82797],["05-28","b","w","w",322,null,59,4,2,1,2,0,0,4,0,8,22,0,"m",66,0,0,3,0,14,4,82807],["05-28","b","w","w",330,56.3,33,1,1,2,1,0,1,0,0,8,9,0,"m",162,0,0,93,0,14,4,82812],["05-28","b","b","l",322,53.5,35,2,1,0,1,0,0,2,0,8,9,0,"m",173,0,0,58,0,14,4,82818],["05-28","b","b","w",330,71.3,29,0,0,0,0,0,0,0,0,8,6,0,"m",189,0,0,58,0,14,4,82822],["05-28","b","w","w",338,74.9,51,0,1,2,1,41,0,0,0,8,18,0,"m",109,0,0,12,0,15,4,82870],["05-28","b","w","l",330,41.2,58,3,1,0,0,0,0,3,0,8,21,0,"m",3,1,0,12,3,15,4,82900],["05-28","b","w","w",338,73.6,93,0,2,1,2,0,0,0,0,8,39,0,"m",12,0,0,19,0,16,4,82976],["05-28","b","b","l",330,null,71,7,2,2,0,0,0,7,0,8,27,0,"m",1,1,0,45,3,20,4,83215],["05-29","b","b","w",338,75.7,34,0,0,0,0,0,0,0,0,8,9,0,"m",172,0,0,36,0,10,5,84011],["05-29","b","b","l",330,49.2,61,5,6,2,3,0,1,4,0,8,22,0,"m",1,1,0,42,1,16,5,84380],["05-29","b","w","d",330,92.3,93,0,0,0,0,0,0,0,0,8,13,26,"e",35,0,0,11,0,17,5,84429],["05-29","b","b","l",322,71.3,79,3,0,0,0,0,1,2,0,8,31,0,"m",1,1,0,27,0,19,5,84557],["05-30","b","b","w",331,65.8,82,2,0,2,0,22,0,2,0,8,33,0,"m",98,0,0,90,0,11,6,85523],["05-30","b","b","w",339,70.5,16,0,0,0,0,0,0,0,0,8,0,0,"o",243,0,0,5,0,11,6,85532],["05-30","b","w","w",347,null,25,0,0,0,0,0,0,0,0,8,5,0,"m",154,0,0,12,0,22,6,86195],["05-30","b","b","d",346,null,108,2,1,0,1,0,0,1,1,8,30,16,"m",12,0,0,58,0,22,6,86205],["05-30","r","b","w",460,80.3,50,0,4,4,4,26,0,0,0,8,17,0,"m",321,0,0,42,0,23,6,86257],["05-30","r","w","w",463,null,37,0,1,1,1,31,0,0,0,8,11,0,"m",321,0,0,6,0,23,6,86266],["05-30","r","b","w",466,null,12,0,0,0,0,0,0,0,0,6,0,0,"o",554,0,1,95,0,23,6,86268],["05-30","r","w","w",469,null,29,0,0,0,0,21,0,0,0,8,7,0,"m",441,0,0,6,0,23,6,86273],["05-31","r","b","w",469,null,42,0,4,2,4,0,0,0,0,8,13,0,"m",398,0,0,102,0,0,6,86283],["05-31","r","w","w",469,86.4,43,0,0,4,0,9,0,0,0,8,14,0,"m",265,0,0,103,0,0,6,86294],["05-31","b","w","w",354,64.7,63,2,3,3,3,41,0,2,0,8,24,0,"m",11,0,0,17,0,0,6,86308],["05-31","b","w","l",346,null,28,0,1,0,1,25,0,0,0,8,6,0,"m",165,0,0,12,0,12,0,87054],["05-31","b","w","w",354,85.9,39,0,1,2,1,0,0,0,0,8,12,0,"m",173,0,0,18,0,13,0,87071],["05-31","b","b","l",346,null,75,4,2,3,2,0,0,4,0,8,28,1,"e",2,1,0,104,3,16,0,87264],["05-31","b","b","l",338,null,59,2,0,0,0,0,0,2,0,8,21,0,"m",8,1,0,45,0,19,0,87442],["05-31","b","b","l",330,62.1,99,7,2,1,1,28,1,6,0,8,41,0,"m",32,0,0,105,0,20,0,87523],["05-31","r","w","w",472,null,40,0,1,2,1,25,0,0,0,8,12,0,"m",382,0,0,17,0,22,0,87615],["05-31","r","b","w",475,57.9,52,1,1,3,1,40,0,1,0,8,18,0,"m",426,0,0,106,0,22,0,87623],["05-31","r","w","w",478,92.4,57,2,3,4,2,39,1,1,0,8,21,0,"m",340,0,0,17,0,22,0,87632],["05-31","b","w","w",338,80.5,39,2,1,1,1,25,0,2,0,8,12,0,"m",115,0,0,18,0,22,0,87642],["06-01","b","w","w",346,84.1,45,1,0,2,0,29,0,1,0,8,15,0,"m",96,0,0,17,0,15,1,88623],["06-01","b","b","w",354,62.5,62,2,2,4,2,0,0,2,0,8,23,0,"m",15,0,0,73,0,16,1,88733],["06-01","b","w","w",362,87.6,23,0,0,1,0,0,0,0,0,8,4,0,"m",247,0,0,18,0,17,1,88791],["06-01","b","w","l",354,null,24,1,1,0,1,0,0,1,0,8,4,0,"m",224,0,0,100,0,18,1,88820],["06-02","b","b","w",361,78.1,37,0,0,1,0,0,0,0,0,8,10,0,"m",98,0,0,107,0,14,2,90055],["06-02","b","w","d",361,null,105,5,0,0,0,35,1,4,0,8,31,14,"m",26,0,0,11,0,20,2,90413],["06-03","b","b","w",369,null,82,2,0,1,0,0,0,2,0,8,30,3,"e",55,0,0,42,0,8,3,91114],["06-03","b","b","l",361,null,67,3,0,1,0,0,0,3,0,8,25,0,"m",66,0,0,22,0,10,3,91232],["06-03","b","w","w",369,84.5,44,0,3,2,3,0,0,0,0,8,14,0,"m",86,0,0,19,0,23,3,92001],["06-03","b","w","l",361,null,22,2,1,0,0,19,0,2,0,8,3,0,"m",234,0,0,54,0,23,3,92009],["06-04","b","b","w",369,50,51,1,2,2,2,28,1,0,0,8,17,0,"m",145,0,0,108,0,10,4,92663],["06-04","b","b","d",368,77.4,95,4,0,1,0,26,1,3,0,8,22,17,"e",38,0,0,108,0,15,4,92996],["06-04","b","w","w",376,78.4,35,0,0,1,0,25,0,0,0,8,10,0,"m",167,0,0,50,0,16,4,93003],["06-04","b","w","w",384,78.4,55,0,1,0,1,27,0,0,0,8,20,0,"m",44,0,0,109,0,23,4,93459],["06-05","b","b","l",376,72,87,0,0,1,0,0,0,0,0,8,14,21,"e",2,1,0,7,0,0,4,93498],["06-05","b","b","d",376,null,77,1,0,0,0,28,0,0,1,8,19,11,"e",20,0,0,2,0,0,4,93507],["06-05","b","w","l",368,75.1,82,1,0,1,0,17,0,1,0,8,18,15,"m",53,0,0,19,0,8,5,94020],["06-05","b","w","w",376,51.9,51,0,0,1,0,29,0,0,0,8,18,0,"m",80,0,0,50,0,9,5,94029],["06-05","b","b","l",368,47.3,27,0,0,0,0,0,0,0,0,8,5,0,"m",131,0,0,0,0,11,5,94152],["06-05","b","b","l",360,null,23,1,0,0,0,0,0,1,0,8,3,0,"m",221,0,0,110,0,11,5,94158],["06-05","b","w","l",352,59.5,88,2,1,0,1,35,0,2,0,8,29,7,"m",10,0,0,12,0,11,5,94168],["06-05","b","w","w",360,66.1,35,0,0,1,0,0,0,0,0,8,10,0,"m",142,0,0,111,0,19,5,94643],["06-05","b","b","l",352,null,107,4,1,3,1,0,0,4,0,8,39,6,"m",0,1,0,45,2,21,5,94792],["06-05","b","w","w",361,null,43,0,0,1,0,29,0,0,0,8,14,0,"m",177,0,0,48,0,21,5,94796],["06-05","b","b","l",353,49.1,71,5,5,3,3,0,0,5,0,8,27,0,"m",1,1,0,45,4,22,5,94806],["06-06","b","w","l",345,null,64,1,0,0,0,29,0,1,0,8,24,0,"m",2,1,0,63,1,10,6,95567],["06-06","b","b","w",353,79.8,120,2,0,2,0,30,0,2,0,8,52,0,"m",13,0,0,79,0,10,6,95576],["06-06","b","w","l",345,65.9,36,0,0,1,0,21,0,0,0,8,10,0,"m",102,0,0,12,0,11,6,95587],["06-06","b","b","l",337,75.6,99,3,1,2,1,22,0,3,0,8,41,0,"m",27,0,0,112,0,11,6,95597],["06-06","b","w","l",329,null,86,4,0,2,0,0,1,3,0,8,32,3,"m",106,0,0,19,0,11,6,95605],["06-06","b","w","l",321,66.5,48,2,1,0,0,37,0,2,0,8,16,0,"m",188,0,0,17,0,11,6,95610],["06-06","b","b","w",329,57.5,72,2,6,3,4,0,0,2,0,8,28,0,"m",1,0,0,113,1,15,6,95838],["06-06","b","b","l",321,null,17,1,0,0,0,0,1,0,0,8,0,0,"m",268,0,0,37,0,23,6,96306],["06-06","b","w","w",329,77.9,48,0,2,2,2,0,0,0,0,8,16,0,"m",129,0,0,42,0,23,6,96313],["06-06","b","b","l",321,null,47,2,1,0,1,32,0,2,0,8,15,0,"m",74,0,0,45,0,23,6,96322],["06-06","b","w","w",329,63,47,2,3,3,3,0,0,2,0,8,16,0,"m",94,0,0,54,0,23,6,96328],["06-07","b","b","w",337,67.4,60,3,1,0,0,0,0,3,0,8,22,0,"m",90,0,0,42,0,2,0,96493],["06-07","b","w","l",329,null,34,0,0,0,0,27,0,0,0,8,9,0,"m",102,0,0,54,0,2,0,96507],["06-07","b","b","w",338,78.5,52,3,0,1,0,34,0,3,0,8,18,0,"m",38,0,0,33,0,12,0,97083],["06-07","b","w","d",338,null,57,1,0,1,0,31,0,1,0,8,21,0,"m",18,0,0,17,0,12,0,97114],["06-07","b","b","l",330,58.6,111,4,2,3,2,28,0,4,0,8,20,27,"m",1,1,0,34,0,12,0,97124],["06-07","b","w","l",322,null,66,2,0,1,0,21,0,2,0,8,22,3,"e",1,1,0,17,1,14,0,97210],["06-07","b","b","l",314,47.8,9,0,0,0,0,0,0,0,0,4,0,0,"o",284,0,0,42,0,14,0,97211],["06-07","b","b","l",306,null,15,2,0,0,0,0,2,0,0,7,0,0,"o",235,0,1,42,0,14,0,97214],["06-07","b","w","l",298,null,28,2,0,0,0,0,0,2,0,8,6,0,"m",155,0,0,17,0,14,0,97218],["06-07","b","w","w",306,84.2,53,1,2,1,2,43,0,1,0,8,19,0,"m",54,0,0,12,0,14,0,97226],["06-07","b","b","w",314,80.4,50,1,2,2,1,0,1,0,0,8,17,0,"m",49,0,0,43,0,14,0,97234],["06-07","b","b","w",322,null,2,0,0,0,0,0,0,0,0,1,0,0,"o",295,0,0,114,0,15,0,97284],["06-07","b","w","l",314,69.6,100,3,1,3,1,0,0,2,1,8,18,24,"m",1,1,0,93,1,15,0,97294],["06-07","b","b","w",322,83.5,38,0,3,3,2,0,0,0,0,8,11,0,"m",175,0,0,115,0,17,0,97434],["06-08","b","b","l",314,null,107,5,0,1,0,0,0,5,0,8,32,13,"m",14,0,0,33,0,10,1,98403],["06-08","b","w","w",322,100,11,0,0,1,0,0,0,0,0,6,0,0,"o",261,0,0,54,0,12,1,98547],["06-08","b","w","w",330,64.4,47,0,1,0,0,13,0,0,0,8,16,0,"m",71,0,0,17,0,12,1,98554],["06-08","b","b","l",322,66.4,61,0,0,1,0,0,0,0,0,8,22,0,"m",0,1,0,116,0,16,1,98819],["06-08","b","b","d",322,null,79,2,1,1,0,36,0,2,0,8,28,3,"e",4,0,0,7,1,20,1,99019],["06-08","b","b","w",330,64.1,38,0,0,2,0,0,0,0,0,8,11,0,"m",118,0,0,6,0,21,1,99113],["06-08","b","w","w",338,49.4,61,1,0,1,0,13,0,1,0,8,23,0,"m",7,0,0,117,0,22,1,99125],["06-09","b","w","l",330,76,62,2,0,2,0,23,1,1,0,8,23,0,"m",34,0,0,54,0,11,2,99907],["06-09","b","w","l",322,null,132,3,0,2,0,35,0,2,1,8,38,20,"m",0,1,0,18,0,11,2,99918],["06-09","b","b","l",314,null,43,1,2,0,2,20,0,1,0,8,13,0,"m",1,1,0,118,0,22,2,100572],["06-10","b","b","w",322,46,14,0,0,0,0,0,0,0,0,7,0,0,"o",251,0,0,119,0,19,3,101831],["06-10","b","w","l",314,70.2,24,1,0,0,0,0,0,1,0,8,4,0,"m",140,0,0,12,0,19,3,101837],["06-10","b","w","l",306,null,40,4,0,1,0,21,0,4,0,8,12,0,"m",6,0,0,11,1,22,3,102000],["06-10","b","b","w",314,52.8,44,0,0,2,0,0,0,0,0,8,14,0,"m",103,0,0,42,0,22,3,102006],["06-10","b","w","w",321,28.9,59,6,4,4,3,11,0,6,0,8,22,0,"e",3,0,0,120,2,22,3,102018],["06-11","b","b","l",313,null,89,5,6,3,4,38,0,5,0,8,30,6,"e",2,1,0,114,0,10,4,102735],["06-11","b","b","l",305,null,55,3,5,1,4,0,0,3,0,8,19,0,"m",1,1,0,34,1,15,4,103049],["06-11","b","w","w",313,46.7,45,1,0,2,0,9,0,1,0,8,15,0,"m",102,0,0,36,0,21,4,103383],["06-11","u","w","l",204,null,40,0,3,2,3,0,0,0,0,8,12,0,"m",5,1,0,18,0,21,4,103386],["06-11","u","w","w",212,81.6,51,3,2,1,2,25,0,3,0,8,18,0,"m",5,0,0,11,2,21,4,103388],["06-12","b","b","w",321,73.6,48,1,1,1,1,40,0,1,0,8,16,0,"m",140,0,0,65,0,9,5,104115],["06-12","b","b","w",329,83.6,62,0,1,2,1,30,0,0,0,8,23,0,"m",86,0,0,121,0,9,5,104123],["06-12","b","b","l",321,null,75,0,0,1,0,26,0,0,0,8,29,0,"m",1,1,0,40,0,11,5,104222],["06-12","b","w","d",322,69.5,122,1,0,0,0,25,1,0,0,8,14,39,"e",16,0,0,11,0,11,5,104231],["06-12","b","b","l",314,null,71,4,1,1,1,10,0,4,0,8,27,0,"m",60,0,0,0,0,18,5,104688],["06-12","b","w","w",322,89.4,31,0,0,0,0,23,0,0,0,8,8,0,"m",248,0,0,54,0,18,5,104690],["06-12","b","b","w",329,89.9,30,0,0,1,0,16,0,0,0,8,7,0,"m",146,0,0,20,0,18,5,104696],["06-13","r","w","l",465,53.6,46,3,3,1,2,0,0,3,0,8,15,0,"m",248,0,0,12,0,15,6,105952],["06-13","b","w","l",321,null,48,4,0,1,0,21,0,4,0,8,16,0,"m",84,0,0,19,0,21,6,106315],["06-13","u","b","l",204,null,47,4,0,1,0,28,1,3,0,8,15,0,"m",0,1,0,122,2,23,6,106408],["06-14","b","w","w",329,68.2,53,2,0,1,0,19,0,2,0,8,19,0,"m",23,0,0,3,0,10,0,107057],["06-14","b","b","l",320,null,61,9,0,2,0,0,1,8,0,8,22,0,"m",3,1,1,105,4,16,0,107438],["06-14","u","b","l",196,null,45,1,0,1,0,18,0,1,0,8,14,0,"m",1,1,0,117,0,20,0,107658],["06-15","b","w","l",313,null,26,2,0,0,0,23,0,2,0,8,5,0,"m",233,0,0,123,0,12,1,108639],["06-15","b","b","l",306,46.4,43,1,0,0,0,20,0,1,0,8,13,0,"m",95,0,0,5,0,12,1,108646],["06-15","b","w","l",298,null,26,2,0,0,0,17,1,1,0,8,5,0,"m",173,0,0,24,0,21,1,109163],["06-15","r","b","w",478,60.4,48,2,3,3,3,28,0,2,0,8,16,0,"m",346,0,0,42,0,21,1,109171],["06-15","r","w","w",490,76.7,47,1,0,2,0,7,0,1,0,8,16,0,"m",271,0,0,1,0,21,1,109188],["06-15","r","b","w",501,64.8,48,2,0,0,0,32,0,2,0,8,16,0,"m",214,0,0,124,0,22,1,109204],["06-15","r","w","w",512,73.3,27,0,0,0,0,0,0,0,0,8,6,0,"m",524,0,0,6,0,22,1,109209],["06-15","r","b","w",522,79.9,72,0,1,5,1,10,0,0,0,8,28,0,"m",214,0,0,0,0,22,1,109221],["06-16","b","w","w",306,86.1,31,0,0,3,0,0,0,0,0,8,8,0,"m",129,0,0,125,0,20,2,110564],["06-16","r","w","l",512,null,100,6,0,1,0,13,0,6,0,8,36,6,"m",53,0,0,101,0,22,2,110644],["06-16","r","b","l",501,null,15,1,0,0,0,0,1,0,0,7,0,0,"o",543,0,0,21,0,22,2,110647],["06-16","r","b","l",490,null,63,4,0,1,0,0,0,4,0,8,23,0,"m",196,0,0,6,0,22,2,110657],["06-16","b","w","l",298,null,14,1,0,0,0,0,1,0,0,7,0,0,"o",283,0,0,11,0,22,2,110658],["06-17","b","b","l",290,48.9,69,4,0,0,0,24,1,3,0,8,26,0,"m",1,1,0,96,0,15,3,111696],["06-18","b","w","w",298,92.8,33,0,1,1,1,19,0,0,0,8,9,0,"m",164,0,0,126,0,18,4,113335],["06-18","b","w","w",306,74.4,37,1,1,2,1,27,0,1,0,8,11,0,"m",122,0,0,12,0,19,4,113346],["06-18","b","b","l",298,null,67,6,0,1,0,22,0,6,0,8,25,0,"m",56,0,1,47,0,19,4,113357],["06-18","b","w","l",290,62.6,44,2,0,1,0,31,0,2,0,8,14,0,"m",129,0,1,12,0,19,4,113364],["06-19","b","b","l",282,69.1,59,2,1,1,0,20,1,1,0,8,21,0,"m",48,0,1,127,0,9,5,114218],["06-19","b","w","l",274,null,100,3,1,1,0,35,0,3,0,8,38,4,"e",1,1,0,81,0,9,5,114227],["06-19","r","b","l",480,33.1,45,3,0,1,0,0,1,2,0,8,14,0,"m",246,0,0,2,0,22,5,114966],["06-19","r","b","l",470,70.4,109,3,1,1,1,42,0,3,0,8,20,26,"e",293,0,0,8,0,22,5,114976],["06-19","r","w","l",461,null,26,3,0,0,0,25,1,2,0,8,5,0,"m",397,0,0,7,0,22,5,114984],["06-19","r","w","w",471,62.2,47,0,4,2,3,13,0,0,0,8,16,0,"m",292,0,1,125,0,22,5,114993],["06-19","r","b","w",480,73.7,34,1,1,2,1,18,0,1,0,8,9,0,"m",444,0,0,128,0,22,5,115001],["06-19","r","b","w",489,80.9,90,0,1,2,1,18,0,0,0,8,30,7,"e",5,0,0,129,0,23,5,115022],["06-19","r","b","l",481,null,39,1,0,0,0,18,0,1,0,8,11,0,"m",465,0,0,50,0,23,5,115034],["06-19","r","w","w",490,77.2,29,0,0,1,0,23,0,0,0,8,7,0,"m",399,0,0,23,0,23,5,115040],["06-19","r","b","l",481,null,15,1,0,0,0,0,1,0,0,7,0,0,"o",489,0,0,130,0,23,5,115050],["06-20","r","w","l",473,64.5,14,0,0,0,0,0,0,0,0,7,0,0,"o",523,0,0,24,0,0,5,115116],["06-20","r","w","w",481,72.6,41,0,0,0,0,21,0,0,0,8,13,0,"m",198,0,0,125,0,0,5,115131],["06-20","r","b","l",474,null,88,3,3,1,2,0,0,3,0,8,35,1,"m",15,0,0,129,0,1,5,115158],["06-20","r","w","l",466,54.2,46,2,4,1,4,19,0,2,0,8,15,0,"m",292,0,0,13,0,19,6,116279],["06-20","r","b","w",474,76.2,30,1,0,3,0,8,0,1,0,8,7,0,"m",484,0,0,101,0,20,6,116286],["06-20","r","b","l",465,null,13,1,0,0,0,0,1,0,0,6,0,0,"o",525,0,0,50,0,20,6,116301],["06-20","r","w","l",457,null,126,3,1,0,1,13,0,3,0,8,36,19,"e",9,1,0,130,0,20,6,116321],["06-20","r","w","w",465,82.5,13,0,0,0,0,0,0,0,0,7,0,0,"o",551,0,0,50,0,22,6,116450],["06-20","r","b","w",473,61.7,46,0,3,1,3,34,0,0,0,8,15,0,"m",202,0,0,131,0,23,6,116487],["06-20","b","w","l",266,null,28,0,0,1,0,0,0,0,0,8,6,0,"m",141,0,0,132,0,23,6,116495],["06-21","b","w","l",258,62,46,0,3,1,3,21,0,0,0,8,15,0,"m",13,0,0,121,0,8,0,117048],["06-21","r","b","w",481,70.2,38,0,0,0,0,32,0,0,0,8,11,0,"m",373,0,0,96,0,10,0,117149],["06-21","r","b","w",489,83.4,26,1,5,4,4,0,0,1,0,8,5,0,"m",474,0,1,133,0,20,0,117742],["06-21","r","w","d",489,77.7,91,7,3,3,1,29,0,7,0,8,38,0,"m",41,0,0,55,0,20,0,117760],["06-21","r","b","l",481,null,55,6,0,0,0,20,0,6,0,8,19,0,"m",101,0,1,5,0,21,0,117831],["06-22","b","w","l",250,33.6,54,3,2,1,2,21,0,3,0,8,19,0,"m",1,1,0,14,2,9,1,118530],["06-22","u","w","l",188,null,36,1,0,0,0,19,0,1,0,8,10,0,"m",2,1,0,12,1,20,1,119169],["06-22","r","b","w",489,65.5,98,2,1,2,0,18,0,2,0,8,41,0,"m",5,0,0,134,0,22,1,119288],["06-23","r","b","l",481,40.2,43,2,1,0,0,0,0,2,0,8,13,0,"m",59,0,0,11,0,10,2,120026],["06-23","r","w","d",481,66.8,139,2,5,3,4,29,0,2,0,8,26,36,"e",117,0,1,3,0,18,2,120514],["06-23","r","b","w",490,83.5,72,2,1,5,0,26,0,2,0,8,28,0,"m",172,0,0,79,0,18,2,120536],["06-23","r","w","w",498,75.1,45,0,0,1,0,19,0,0,0,8,15,0,"m",409,0,0,36,0,19,2,120546],["06-23","r","b","w",506,75.2,66,1,0,3,0,28,0,1,0,8,25,0,"m",121,0,0,135,0,19,2,120564],["06-24","r","w","w",514,66.5,17,0,0,0,0,0,0,0,0,8,1,0,"m",539,0,0,54,0,10,3,121489],["06-24","r","b","d",514,51.3,35,1,1,0,0,20,0,1,0,8,9,0,"m",349,0,0,11,0,12,3,121599],["06-24","r","w","w",523,62.2,23,0,0,0,0,13,0,0,0,8,4,0,"m",525,0,0,101,0,14,3,121695],["06-24","r","b","l",515,66.4,33,3,2,0,1,0,1,2,0,8,8,0,"m",505,0,0,105,0,14,3,121716],["06-24","r","b","l",507,null,47,4,0,0,0,30,0,4,0,8,15,0,"m",443,0,0,45,0,14,3,121721],["06-24","r","w","l",500,null,14,0,0,0,0,0,0,0,0,7,0,0,"o",507,0,0,42,0,14,3,121723],["06-24","b","b","w",258,46.9,58,3,3,1,2,20,0,3,0,8,21,0,"m",24,0,0,136,0,14,3,121732],["06-24","r","w","l",492,73.3,64,2,1,0,1,13,1,1,0,8,24,0,"m",227,0,0,35,0,16,3,121817],["06-24","r","w","w",500,74.4,81,0,3,1,2,21,0,0,0,8,29,4,"m",238,0,0,0,0,22,3,122171],["06-25","r","b","w",508,79.8,56,1,2,4,2,0,0,1,0,8,20,0,"m",177,0,0,11,0,16,4,123268],["06-25","r","b","l",500,null,39,4,0,1,0,26,0,4,0,8,11,0,"m",326,0,0,11,0,16,4,123281],["06-25","r","w","l",492,null,60,2,0,1,0,17,0,1,1,8,17,5,"e",258,0,0,17,0,16,4,123292],["06-25","r","w","w",500,50.2,43,0,0,1,0,31,0,0,0,8,14,0,"m",144,0,0,76,0,17,4,123310],["06-25","r","b","w",508,90.6,18,0,0,0,0,0,0,0,0,8,1,0,"m",498,0,0,11,0,18,4,123416],["06-25","r","w","w",516,84.3,31,1,0,1,0,23,0,1,0,8,8,0,"m",384,0,0,14,0,19,4,123424],["06-25","r","w","w",524,91.4,47,2,0,0,0,0,0,2,0,8,16,0,"m",305,0,0,77,0,19,4,123433],["06-25","r","b","d",524,84.5,47,0,0,1,0,16,0,0,0,8,14,1,"e",143,0,0,137,0,19,4,123470],["06-25","r","b","l",516,62.8,87,3,0,0,0,24,0,3,0,8,27,8,"e",94,0,0,11,0,21,4,123550],["06-25","r","w","w",525,72.6,59,2,0,0,0,0,0,2,0,8,22,0,"m",254,0,0,4,0,21,4,123572],["06-26","r","w","l",517,64.1,68,1,1,0,0,15,0,1,0,8,26,0,"m",17,0,0,19,0,22,5,125045],["06-27","b","w","w",266,54,49,1,1,0,1,23,0,1,0,8,17,0,"m",93,0,0,4,0,9,6,125737],["06-27","b","b","w",274,76.9,30,0,0,2,0,0,0,0,0,8,7,0,"m",103,0,0,138,0,13,6,125940],["06-27","r","b","w",524,85,36,0,0,2,0,0,0,0,0,8,10,0,"m",487,0,0,11,0,15,6,126083],["06-27","r","b","w",531,70.9,68,1,0,1,0,20,0,1,0,8,26,0,"m",201,0,0,11,0,15,6,126095],["06-27","b","b","l",266,null,41,2,1,1,0,30,0,2,0,8,12,0,"m",63,0,0,11,0,18,6,126260],["06-27","r","b","w",539,null,68,0,1,2,1,0,0,0,0,8,26,0,"m",336,0,0,11,0,18,6,126269],["06-27","b","w","l",258,null,86,1,3,1,2,25,0,1,0,8,35,0,"m",1,1,0,19,0,18,6,126280],["06-27","b","b","w",266,67.8,48,2,0,3,0,0,0,2,0,8,16,0,"m",166,0,0,131,0,18,6,126285],["06-27","r","b","w",547,83.9,98,1,0,1,0,0,0,1,0,8,40,1,"m",278,0,0,11,0,22,6,126516],["06-27","r","w","l",539,65.7,98,4,4,0,3,31,0,4,0,8,41,0,"m",5,1,0,19,2,23,6,126544],["06-28","r","w","w",547,73.8,35,1,2,2,1,21,0,1,0,8,10,0,"m",492,0,0,19,0,11,0,127268],["06-28","r","b","w",555,77.7,66,0,0,0,0,36,0,0,0,8,25,0,"m",191,0,0,139,0,12,0,127342],["06-28","r","w","l",547,null,18,1,0,0,0,0,0,1,0,8,1,0,"m",532,0,0,14,0,18,0,127706],["06-28","r","b","w",555,53.2,22,1,0,1,0,0,0,1,0,8,3,0,"m",496,0,1,11,0,18,0,127711],["06-28","r","w","w",563,54,55,2,0,1,0,0,0,2,0,8,20,0,"m",204,0,0,70,0,20,0,127830],["06-28","r","b","w",570,84.8,71,0,1,3,1,34,0,0,0,8,27,0,"m",305,0,0,5,0,21,0,127875],["06-28","r","w","w",579,55.7,49,1,0,0,0,39,0,1,0,8,17,0,"m",331,0,0,18,0,21,0,127888],["06-28","r","w","w",587,90.9,15,0,0,0,0,0,0,0,0,8,0,0,"o",581,0,0,12,0,21,0,127892],["06-28","r","b","w",595,81.3,48,0,0,1,0,30,0,0,0,8,16,0,"m",300,0,0,126,0,21,0,127906],["06-28","b","w","w",274,77.7,39,2,1,0,1,0,1,1,0,8,12,0,"m",141,0,0,3,0,22,0,127924],["06-29","b","b","w",282,65.2,96,7,0,2,0,0,0,7,0,8,26,14,"e",16,0,0,11,0,7,1,128509],["06-29","b","w","w",290,68.5,57,1,0,2,0,15,0,1,0,8,21,0,"m",53,0,0,50,0,10,1,128682],["06-29","b","w","l",282,61.1,58,4,2,1,0,33,0,4,0,8,19,2,"e",77,0,0,12,0,20,1,129257],["06-29","r","w","w",603,70.5,32,0,2,1,1,19,0,0,0,8,8,0,"m",469,0,0,17,0,21,1,129325],["06-29","r","b","d",603,70.2,156,3,0,1,0,0,0,3,0,8,31,39,"e",154,0,0,11,0,21,1,129340],["06-30","b","b","w",290,69.7,44,0,1,2,1,28,0,0,0,8,14,0,"m",107,0,0,5,0,10,2,130125],["06-30","r","w","w",611,91.4,25,0,0,1,0,0,0,0,0,8,5,0,"m",450,0,0,140,0,14,2,130377],["06-30","r","w","l",603,74.6,110,4,0,0,0,19,0,3,1,8,22,25,"m",35,0,0,7,0,15,2,130392],["06-30","r","b","w",611,70.8,70,0,0,1,0,28,0,0,0,8,23,4,"e",334,0,1,11,0,15,2,130403],["06-30","b","b","l",283,null,53,4,0,0,0,28,0,4,0,8,18,0,"m",14,1,0,11,1,18,2,130610],["06-30","b","w","l",275,null,46,5,4,2,3,31,0,5,0,8,15,0,"m",0,1,0,141,2,18,2,130616],["07-01","r","b","l",604,70.7,77,4,0,0,0,26,0,4,0,8,25,5,"m",260,0,0,11,0,8,3,131431],["07-01","r","w","l",597,null,50,4,1,0,1,21,1,3,0,8,17,0,"m",193,0,0,34,0,21,3,132212],["07-01","r","w","w",605,79.6,109,4,1,3,1,0,1,2,1,8,36,11,"m",132,0,1,19,0,21,3,132227],["07-02","b","b","w",283,89.1,26,0,0,1,0,0,0,0,0,8,5,0,"m",211,0,0,11,0,6,4,132731],["07-02","b","w","l",275,null,50,0,0,1,0,23,0,0,0,8,17,0,"m",52,0,0,90,0,9,4,132918],["07-02","r","b","w",613,77.6,80,1,2,1,2,18,0,1,0,8,27,5,"e",214,0,0,126,0,13,4,133168],["07-02","r","w","l",605,null,46,5,0,0,0,17,0,5,0,8,15,0,"m",386,0,0,97,0,13,4,133177],["07-02","r","b","l",597,null,13,1,0,0,0,0,1,0,0,6,0,0,"o",585,0,1,32,0,13,4,133178],["07-02","r","w","l",589,59.8,188,3,0,4,0,37,0,1,2,8,43,43,"e",19,0,0,40,0,13,4,133197],["07-02","u","b","w",196,99.6,10,0,0,1,0,0,0,0,0,5,0,0,"o",52,0,0,11,0,19,4,133527],["07-02","r","b","l",581,null,65,5,0,0,0,0,0,4,1,8,23,1,"e",215,0,0,139,0,21,4,133642],["07-03","r","b","w",590,83.9,40,0,0,2,0,0,0,0,0,8,12,0,"m",448,0,0,11,0,15,5,134719],["07-03","r","w","w",597,70.3,67,1,3,0,3,15,0,1,0,8,26,0,"m",55,0,0,110,0,16,5,134779],["07-03","r","w","w",605,64.1,45,1,1,1,1,39,0,1,0,8,15,0,"m",333,0,0,65,0,16,5,134804],["07-03","r","w","d",605,null,89,1,1,4,0,43,1,0,0,8,29,8,"e",178,0,0,91,0,16,5,134817],["07-03","b","b","w",283,62,24,0,0,0,0,0,0,0,0,8,4,0,"m",191,0,0,63,0,23,5,135182],["07-03","b","w","w",291,75,61,0,2,2,1,15,0,0,0,8,23,0,"m",48,0,1,125,0,23,5,135203],["07-04","r","b","w",613,74.6,34,0,0,2,0,0,0,0,0,8,9,0,"m",421,0,0,142,0,9,6,135834],["07-04","b","b","l",283,null,9,0,0,0,0,0,0,0,0,4,0,0,"o",160,0,0,142,0,21,6,136543],["07-04","u","w","l",188,null,32,1,0,0,0,25,0,1,0,8,8,0,"m",1,1,0,65,0,21,6,136549],["07-04","r","w","w",622,61.2,57,0,0,1,0,21,0,0,0,8,21,0,"m",276,0,0,125,0,22,6,136598],["07-04","r","b","l",614,null,49,3,1,1,1,0,1,2,0,8,16,0,"m",112,0,0,142,0,22,6,136614],["07-04","r","b","l",606,null,35,3,2,0,1,26,0,3,0,8,9,0,"m",243,0,1,6,0,23,6,136623],["07-04","r","w","w",614,100,4,0,0,0,0,0,0,0,0,2,0,0,"o",589,0,0,11,0,23,6,136631],["07-05","r","b","w",622,87.4,26,0,0,1,0,0,0,0,0,8,5,0,"m",441,0,0,134,0,11,0,137348],["07-05","r","w","l",614,null,22,1,0,0,0,17,0,1,0,8,3,0,"m",396,0,0,19,0,11,0,137353],["07-05","r","b","l",606,50.9,45,2,0,0,0,28,0,2,0,8,14,0,"m",338,0,0,73,0,11,0,137362],["07-05","r","w","l",598,63.3,52,5,0,0,0,0,0,5,0,8,18,0,"m",1,1,0,17,2,11,0,137382],["07-05","r","b","w",606,73.1,20,0,0,0,0,0,0,0,0,8,2,0,"m",568,0,0,11,0,11,0,137386],["07-05","r","w","w",614,67.7,47,3,1,0,0,13,1,2,0,8,16,0,"m",261,0,0,143,0,15,0,137611],["07-05","r","w","l",606,72.5,56,5,1,0,0,0,0,5,0,8,20,0,"m",212,0,0,144,0,15,0,137621],["07-05","r","b","l",598,null,99,3,2,3,2,38,0,3,0,8,23,18,"m",0,1,0,34,0,15,0,137639],["07-05","r","w","l",589,78.9,42,6,0,1,0,0,0,6,0,8,13,0,"m",162,0,1,145,0,16,0,137653],["07-05","r","b","w",597,44.8,54,1,1,2,1,38,0,1,0,8,19,0,"m",271,0,0,138,0,16,0,137665],["07-05","r","w","l",589,63.3,68,4,0,1,0,13,0,4,0,8,26,0,"m",183,0,0,12,0,16,0,137680],["07-05","r","w","d",589,63.7,178,1,6,2,6,19,0,1,0,8,33,48,"e",1,0,0,125,0,17,0,137709],["07-05","r","w","l",580,null,86,4,5,2,2,31,1,3,0,8,35,0,"m",1,1,1,125,0,17,0,137728],["07-05","r","b","w",588,77.3,25,0,0,0,0,0,0,0,0,8,4,0,"m",468,0,0,128,0,17,0,137753],["07-05","r","b","l",580,64.3,109,1,1,1,1,0,0,1,0,8,23,23,"e",3,1,0,12,0,19,0,137825],["07-06","b","b","w",291,97.2,8,0,0,1,0,0,0,0,0,4,0,0,"o",279,0,0,11,0,7,1,138590],["07-06","b","w","w",299,80.4,35,1,0,0,0,19,0,1,0,8,10,0,"m",32,0,0,70,0,10,1,138734],["07-06","r","b","w",637,98.4,20,0,0,0,0,0,0,0,0,8,2,0,"m",483,0,1,11,0,18,1,139225],["07-06","r","w","l",629,69.9,59,4,3,2,2,23,0,4,0,8,22,0,"m",240,0,0,12,0,18,1,139236],["07-06","r","b","w",637,87.7,36,0,0,6,0,0,0,0,0,8,10,0,"m",400,0,0,45,0,18,1,139241],["07-06","b","b","w",307,76.6,54,0,0,3,0,20,0,0,0,8,19,0,"m",36,0,0,11,0,19,1,139262],["07-06","d","w","w",637,88,45,1,0,0,0,25,0,1,0,8,15,0,"m",null,0,0,146,0,19,1,139277],["07-07","b","w","l",298,null,18,1,0,0,0,0,0,1,0,8,1,0,"m",236,0,1,34,0,10,2,140196],["07-07","b","b","w",306,64.4,62,0,0,1,0,32,0,0,0,8,23,0,"m",38,0,0,11,0,10,2,140203],["07-07","b","w","l",298,null,36,1,0,0,0,25,0,1,0,8,10,0,"m",112,0,1,125,0,13,2,140372],["07-07","r","b","l",629,null,47,2,0,0,0,0,0,2,0,8,15,0,"m",94,0,0,11,0,14,2,140438],["07-07","r","w","l",621,79.1,76,4,0,1,0,13,0,4,0,8,30,0,"e",1,1,0,27,0,17,2,140634],["07-07","r","w","l",613,null,22,1,0,0,0,0,0,1,0,8,3,0,"m",503,0,0,23,0,18,2,140641],["07-07","r","b","l",604,68.2,125,2,3,0,3,28,0,1,1,8,26,28,"e",134,0,0,138,0,18,2,140655],["07-07","r","b","d",604,61.9,120,1,2,2,1,26,0,1,0,8,28,24,"e",123,0,0,11,0,20,2,140790],["07-07","r","w","w",612,68.9,19,1,0,1,0,0,1,0,0,8,2,0,"m",556,0,1,50,0,20,2,140798],["07-07","r","w","w",620,93.6,17,0,0,0,0,0,0,0,0,8,1,0,"m",523,0,0,54,0,20,2,140803],["07-07","r","w","w",628,78.1,59,1,0,0,0,27,0,1,0,8,22,0,"m",252,0,0,12,0,20,2,140815],["07-07","r","b","w",637,89.9,44,0,3,3,2,12,0,0,0,8,14,0,"m",446,0,0,69,0,21,2,140826],["07-08","r","b","w",644,77.7,46,1,1,1,0,30,0,1,0,8,15,0,"m",247,0,0,11,0,15,3,141957],["07-08","r","w","w",652,80,43,0,0,0,0,25,0,0,0,8,14,0,"m",390,0,0,23,0,16,3,141968],["07-08","r","w","w",659,73.1,33,1,0,3,0,29,1,0,0,8,9,0,"m",388,0,0,13,0,16,3,141980],["07-08","r","w","l",651,70.9,70,1,0,0,0,23,0,1,0,8,18,9,"m",286,0,0,54,0,16,3,141990],["07-08","b","b","w",306,51.7,62,3,6,1,4,0,0,3,0,8,23,0,"m",69,0,0,45,0,18,3,142132],["07-08","r","b","l",643,60.2,61,0,0,0,0,0,0,0,0,8,22,0,"m",243,0,0,134,0,20,3,142256],["07-08","r","w","w",651,96.2,31,1,0,1,0,19,0,1,0,8,8,0,"m",445,0,0,70,0,21,3,142262],["07-08","b","b","l",298,null,65,4,0,2,0,36,0,4,0,8,24,0,"m",0,1,0,11,2,21,3,142273],["07-09","b","b","l",291,null,43,1,0,0,0,18,0,1,0,8,13,0,"m",10,1,0,45,1,9,4,143003],["07-09","b","w","l",283,null,52,0,0,0,0,23,0,0,0,8,18,0,"m",48,0,0,11,0,13,4,143242],["07-09","b","b","l",275,63,93,2,0,0,0,16,0,0,2,8,16,22,"e",1,1,1,11,1,13,4,143263],["07-09","b","w","w",283,null,55,2,1,3,0,27,0,2,0,8,20,0,"m",11,0,0,12,0,19,4,143635],["07-09","r","b","l",643,74.8,59,3,2,1,1,34,0,3,0,8,21,0,"m",282,0,0,139,0,20,4,143699],["07-09","r","w","l",635,null,22,1,0,0,0,0,0,1,0,8,3,0,"m",486,0,1,12,0,21,4,143708],["07-09","r","b","w",643,71.4,60,1,1,2,1,28,0,1,0,8,22,0,"m",318,0,0,11,0,21,4,143717],["07-10","r","b","w",650,62.7,52,1,0,0,0,0,1,0,0,8,18,0,"m",178,0,0,11,0,10,5,144537],["07-10","r","b","w",657,79.3,44,0,1,0,1,0,0,0,0,8,14,0,"m",305,0,0,73,0,11,5,144557],["07-10","r","w","w",665,80.7,39,1,0,0,0,25,0,1,0,8,12,0,"m",436,0,1,12,0,14,5,144772],["07-10","r","w","l",657,58.2,58,0,0,0,0,21,0,0,0,8,21,0,"m",21,0,0,147,0,15,5,144796],["07-10","r","w","l",649,null,34,0,0,0,0,15,0,0,0,8,9,0,"m",425,0,0,19,0,22,5,145212],["07-10","r","b","l",641,null,51,1,0,0,0,26,0,1,0,8,17,0,"m",263,0,1,11,0,22,5,145224],["07-11","r","w","l",633,74.7,110,0,1,1,1,19,0,0,0,8,27,20,"e",223,0,0,12,0,9,6,145919],["07-11","r","b","w",641,75.3,32,0,1,1,1,0,0,0,0,8,8,0,"m",487,0,0,11,0,10,6,145930],["07-11","r","w","l",634,null,18,1,0,0,0,0,1,0,0,8,1,0,"m",561,0,0,23,0,10,6,145938],["07-11","r","w","w",642,74.5,79,1,3,0,3,17,0,1,0,8,32,0,"m",86,0,1,125,0,10,6,145955],["07-12","r","b","l",634,56.6,29,0,0,0,0,0,0,0,0,8,6,0,"m",434,0,0,5,0,2,0,146915],["07-12","r","b","l",626,null,33,2,0,0,0,18,1,1,0,8,8,0,"m",429,0,0,138,0,2,0,146921],["07-12","r","w","w",634,65.2,39,0,0,0,0,25,0,0,0,8,12,0,"m",388,0,0,48,0,2,0,146927],["07-12","b","w","w",291,70.6,59,3,0,3,0,29,0,3,0,8,22,0,"m",10,0,0,12,0,2,0,146934],["07-12","b","b","w",299,78,64,3,2,3,2,16,0,3,0,8,24,0,"m",32,0,1,25,0,10,0,147389],["07-12","r","w","w",642,82,37,0,1,1,1,23,0,0,0,8,11,0,"m",440,0,0,18,0,14,0,147621],["07-12","r","b","w",650,85.6,48,1,0,1,0,22,0,1,0,8,16,0,"m",447,0,0,138,0,14,0,147627],["07-12","r","b","w",658,70.8,60,2,0,2,0,24,0,2,0,8,22,0,"m",305,0,0,11,0,14,0,147640],["07-12","r","w","l",649,72.1,110,2,1,0,0,0,0,1,1,8,34,13,"m",78,0,0,148,0,14,0,147658],["07-12","r","b","l",641,76.7,101,4,0,2,0,40,0,3,1,8,34,8,"m",30,0,0,11,0,15,0,147675],["07-12","r","w","l",633,null,48,1,0,0,0,13,0,1,0,8,16,0,"m",235,0,0,36,0,17,0,147828],["07-12","r","b","l",625,68.2,113,2,1,0,1,26,0,2,0,8,48,0,"m",1,1,0,149,0,18,0,147846],["07-12","b","w","w",307,72,19,0,0,0,0,0,0,0,0,8,2,0,"m",144,0,0,18,0,20,0,147962],["07-12","r","b","w",633,60.2,70,1,0,1,0,38,0,1,0,8,27,0,"m",220,0,0,45,0,22,0,148120],["07-13","b","b","l",300,null,59,3,3,2,3,32,0,3,0,8,21,0,"m",1,1,0,11,2,7,1,148678],["07-13","r","w","l",625,43.2,104,2,4,0,4,0,0,2,0,8,34,10,"e",1,1,0,18,0,9,1,148762],["07-13","r","w","w",634,null,23,0,1,1,1,11,0,0,0,8,4,0,"m",531,0,0,127,0,10,1,148814],["07-13","r","b","l",626,69.2,101,3,1,1,1,20,0,3,0,8,33,9,"m",167,0,0,11,0,10,1,148827],["07-13","r","w","w",634,73.6,145,2,1,0,1,25,0,1,1,8,32,33,"e",112,0,0,125,0,10,1,148844],["07-13","r","w","l",626,null,58,6,1,0,0,0,0,6,0,8,21,0,"m",120,0,0,18,0,10,1,148859],["07-13","r","b","l",618,null,27,2,0,0,0,0,1,1,0,8,5,0,"m",433,0,1,150,0,11,1,148867],["07-13","r","w","w",625,85.7,31,1,0,0,0,25,0,1,0,8,8,0,"m",360,0,0,54,0,11,1,148873],["07-13","r","w","l",617,null,50,2,0,1,0,0,0,2,0,8,17,0,"m",330,0,0,4,0,11,1,148885],["07-13","b","b","l",292,47,41,1,2,2,1,0,0,1,0,8,12,0,"m",6,1,1,134,0,14,1,149086],["07-13","b","b","l",284,null,13,0,0,0,0,0,0,0,0,6,0,0,"o",151,0,0,11,0,14,1,149088],["07-13","r","b","w",625,65.3,90,4,1,3,1,28,0,4,0,8,37,0,"m",107,0,0,150,0,15,1,149110],["07-13","r","w","w",633,98.2,15,0,0,0,0,0,0,0,0,8,0,0,"o",534,0,0,50,0,15,1,149134],["07-13","r","w","l",625,null,86,4,0,0,0,23,0,4,0,8,35,0,"m",162,0,0,129,0,15,1,149147],["07-13","r","b","d",626,69.1,120,2,0,1,0,0,0,2,0,8,23,29,"e",110,0,0,135,0,15,1,149159],["07-13","r","b","w",634,67.1,50,1,4,1,3,0,1,0,0,8,17,0,"m",312,0,0,5,0,18,1,149308],["07-13","r","w","l",626,70.7,67,2,0,0,0,0,0,2,0,8,26,0,"m",100,0,0,151,0,18,1,149328],["07-14","b","b","w",292,70.4,28,0,0,0,0,0,0,0,0,8,6,0,"m",122,0,0,45,0,10,2,150244],["07-14","r","w","l",618,74.5,142,5,1,0,1,27,0,4,1,8,48,15,"m",157,0,0,23,0,10,2,150264],["07-14","r","w","l",611,null,30,1,0,1,0,0,0,1,0,8,7,0,"m",449,0,0,14,0,11,2,150302],["07-14","r","b","w",619,76.9,64,0,2,2,1,34,0,0,0,8,24,0,"m",304,0,0,11,0,11,2,150314],["07-14","b","w","w",300,73.6,17,0,0,1,0,0,0,0,0,8,1,0,"m",141,0,1,51,0,11,2,150326],["07-14","r","b","w",627,69.7,68,1,2,0,2,38,0,1,0,8,26,0,"m",35,0,1,134,0,14,2,150489],["07-14","r","w","l",619,62.9,92,0,0,1,0,11,0,0,0,8,36,2,"m",96,0,0,42,0,17,2,150679],["07-14","u","b","w",196,87.6,42,3,0,6,0,12,0,3,0,8,13,0,"m",0,0,0,45,3,18,2,150737],["07-14","b","w","l",292,63.7,56,3,1,1,1,23,0,3,0,8,20,0,"m",1,1,0,17,1,21,2,150907],["07-15","b","b","l",284,65.7,49,2,0,0,0,22,0,2,0,8,16,0,"m",42,0,1,11,0,14,3,151976],["07-15","r","w","w",627,71.3,39,1,0,0,0,23,0,1,0,8,12,0,"m",425,0,0,151,0,15,3,152008],["07-16","b","w","d",284,60,155,4,0,2,0,37,0,2,2,8,13,57,"e",23,0,1,6,0,8,4,153033],["07-16","r","b","l",619,null,59,2,1,0,1,22,0,2,0,8,21,0,"e",415,0,0,139,0,14,4,153388],["07-16","r","b","l",611,null,29,1,1,0,1,22,0,1,0,8,6,0,"m",498,0,0,45,0,14,4,153390],["07-16","r","w","l",603,null,52,1,0,1,0,17,0,1,0,8,18,0,"m",381,0,0,54,0,14,4,153398],["07-16","r","w","w",611,58,49,5,0,2,0,25,0,5,0,8,17,0,"m",414,0,0,19,0,14,4,153406],["07-17","b","b","w",292,90.8,58,0,0,0,0,18,0,0,0,8,18,3,"e",101,0,0,138,0,9,5,154536],["07-17","b","b","l",285,59,73,2,2,1,1,26,0,2,0,8,28,0,"m",1,1,0,11,2,12,5,154686],["07-17","r","w","w",619,71.6,95,1,0,3,0,17,0,1,0,8,29,11,"m",334,0,0,3,0,13,5,154768],["07-17","r","b","l",611,69.2,29,0,2,0,1,24,0,0,0,8,6,0,"m",511,0,0,11,0,13,5,154773],["07-17","r","w","l",603,null,46,5,1,0,0,31,0,5,0,8,15,0,"m",413,0,1,48,0,13,5,154779],["07-17","r","w","l",595,39.4,70,1,2,1,2,43,0,1,0,8,27,0,"m",141,0,0,125,0,13,5,154797],["07-17","r","b","l",587,null,17,0,0,0,0,0,0,0,0,8,0,0,"m",553,0,0,152,0,13,5,154800],["07-17","r","w","l",579,63.9,50,1,0,0,0,13,0,1,0,8,17,0,"m",185,0,0,125,0,18,5,155087],["07-17","b","b","w",293,56,60,0,0,0,0,14,0,0,0,8,22,0,"m",10,0,0,32,0,18,5,155096],["07-18","b","b","w",301,52.8,42,4,0,1,0,26,2,2,0,8,13,0,"m",80,0,1,11,0,11,6,156077],["07-18","b","w","w",309,90.4,87,0,0,1,0,23,0,0,0,8,14,22,"e",15,0,0,17,0,11,6,156084],["07-18","r","w","l",571,34.7,80,2,0,3,0,23,0,2,0,8,32,0,"m",261,0,0,125,0,11,6,156098],["07-18","r","b","l",563,null,64,6,0,2,0,30,0,6,0,8,24,0,"m",234,0,0,153,0,11,6,156117],["07-18","r","w","w",571,84.1,53,0,1,2,1,37,0,0,0,8,19,0,"m",370,0,0,99,0,16,6,156362],["07-18","r","b","l",563,null,27,1,0,0,0,18,0,1,0,8,5,0,"m",465,0,0,138,0,16,6,156393],["07-18","r","b","l",555,null,49,1,2,1,0,18,0,1,0,8,16,0,"m",165,0,0,11,0,16,6,156406],["07-18","b","b","l",301,null,49,1,1,2,0,0,0,1,0,8,16,0,"m",1,1,0,11,0,21,6,156683],["07-18","b","w","l",293,null,56,2,2,0,2,39,0,2,0,8,20,0,"m",2,1,0,6,1,21,6,156691],["07-19","b","w","l",285,null,40,3,2,0,0,15,0,3,0,8,12,0,"m",42,0,0,11,0,9,0,157402],["07-19","b","b","w",293,null,56,3,1,1,1,0,0,3,0,8,20,0,"m",17,0,1,73,0,10,0,157457],["07-19","b","w","w",301,55.5,49,0,0,0,0,43,0,0,0,8,17,0,"m",42,0,0,22,0,13,0,157651],["07-19","r","b","l",547,65.1,107,1,0,2,0,0,0,1,0,8,26,19,"e",75,0,0,11,0,14,0,157698],["07-19","r","w","w",555,77.9,21,0,0,0,0,0,0,0,0,8,3,0,"m",523,0,0,14,0,19,0,158010],["07-19","r","w","w",563,92.6,15,0,0,0,0,0,0,0,0,8,0,0,"o",557,0,0,18,0,19,0,158013],["07-19","r","b","w",571,70.4,84,1,1,3,1,22,0,1,0,8,34,0,"m",118,0,0,76,0,19,0,158032],["07-20","r","w","l",562,null,85,2,1,2,1,13,0,2,0,8,27,8,"e",274,0,0,11,0,9,1,158877],["07-20","r","w","w",568,null,41,0,2,3,1,11,0,0,0,8,13,0,"m",492,0,0,19,0,11,1,158985],["07-20","r","b","l",560,null,31,4,0,0,0,0,0,4,0,8,7,0,"m",502,0,0,124,0,15,1,159221],["07-20","r","w","l",552,null,19,2,0,0,0,17,0,2,0,8,2,0,"m",506,0,0,154,0,15,1,159223],["07-20","r","b","l",544,null,17,1,0,0,0,0,1,0,0,8,0,0,"m",541,0,0,9,0,15,1,159225],["07-20","r","b","l",536,null,15,0,0,0,0,0,0,0,0,7,0,0,"o",584,0,0,138,0,15,1,159226],["07-20","r","w","l",528,null,84,5,1,1,1,9,0,5,0,8,34,0,"m",14,0,0,19,0,16,1,159241],["07-20","r","w","l",520,null,18,1,0,0,0,13,0,1,0,8,1,0,"m",527,0,1,8,0,16,1,159243],["07-21","r","b","l",512,75.3,111,1,1,1,1,24,0,1,0,8,20,27,"e",2,1,0,73,0,10,2,160359],["07-21","r","b","l",504,69.6,43,0,0,1,0,14,0,0,0,8,13,0,"m",326,0,0,5,0,10,2,160369],["07-21","r","w","w",512,90.1,37,0,3,1,3,21,0,0,0,8,11,0,"m",393,0,0,23,0,11,2,160383],["07-21","r","b","w",520,78,88,2,3,1,1,48,0,2,0,8,31,5,"m",176,0,0,11,0,11,2,160398]],"examples":[{"t":"hang","fen":"r7/pp1k4/2n1r3/2pQ4/3p1NP1/5P2/qPP4P/2KR1BNR b - - 1 23","played":"Rd6","punish":"Qxa2","gain":900,"ply":46,"ph":"middlegame","clk":94,"url":"171240681620","opp":"westleyjames","date":"2026-07-07","col":"b","res":"l","hour":14,"playedUci":"e6d6","replyUci":"d5a2","tc":"r"},{"t":"hang","fen":"r4rk1/1p5p/p3qp1N/3pp1p1/2P1nBQ1/8/PP3PPP/2R2RK1 b - - 1 22","played":"Kg7","punish":"Qxe6","gain":900,"ply":44,"ph":"middlegame","clk":383,"url":"171348049738","opp":"Ahmadek77","date":"2026-07-09","col":"b","res":"l","hour":20,"playedUci":"g8g7","replyUci":"g4e6","tc":"r"},{"t":"hang","fen":"r3kbnr/pp3ppp/4p3/q2pP3/3P3N/PQ1b4/1P1B1PPP/R2NK2R b KQkq - 1 13","played":"f6","punish":"Bxa5","gain":900,"ply":26,"ph":"middlegame","clk":433,"url":"171505470678","opp":"LeRomsss","date":"2026-07-13","col":"b","res":"l","hour":11,"playedUci":"f7f6","replyUci":"d2a5","tc":"r"},{"t":"miss","fen":"2rq3k/pQ4rp/5p2/3p4/8/7P/PPP2PP1/RN3RK1 b - - 2 19","played":"Rxc2","best":"Rxb7","gain":900,"ply":38,"ph":"middlegame","clk":520,"url":"171645558102","opp":"onamjaiswal","date":"2026-07-16","col":"b","res":"l","hour":14,"playedUci":"c8c2","replyUci":"g7b7","tc":"r"},{"t":"hang","fen":"2r3k1/pp2Npp1/8/3qn2p/5B2/4P1K1/P4PPP/7R b - - 1 22","played":"Kh7","punish":"Nxd5","gain":900,"ply":44,"ph":"middlegame","clk":363,"url":"171731929026","opp":"FieldMarshal60","date":"2026-07-18","col":"b","res":"l","hour":11,"playedUci":"g8h7","replyUci":"e7d5","tc":"r"},{"t":"hang","fen":"r1b2rk1/pp2qpp1/4pn1p/3pR3/7B/2NB4/PPP2PPP/R2Q2K1 b - - 0 13","played":"Ng4","punish":"Bxe7","gain":900,"ply":26,"ph":"middlegame","clk":465,"url":"171742475164","opp":"nocaisclaudio","date":"2026-07-18","col":"b","res":"l","hour":16,"playedUci":"f6g4","replyUci":"h4e7","tc":"r"},{"t":"hang","fen":"rnbq1rk1/ppp1ppbp/6p1/6N1/2n5/2N5/PPP2PPP/R1BQ1RK1 w - - 0 10","played":"Qg4","punish":"Bxg4","gain":900,"ply":19,"ph":"middlegame","clk":506,"url":"171827920866","opp":"nadjaaa666","date":"2026-07-20","col":"w","res":"l","hour":15,"playedUci":"d1g4","replyUci":"c8g4","tc":"r"},{"t":"hang","fen":"r1bq4/ppp2kpp/2n5/3pp3/2Q1n3/8/PPPP1PPP/R1B1K2R w KQ - 0 11","played":"Qxe4","punish":"dxe4","gain":600,"ply":21,"ph":"middlegame","clk":503,"url":"171249667910","opp":"Loli2024","date":"2026-07-07","col":"w","res":"l","hour":18,"playedUci":"c4e4","replyUci":"d5e4","tc":"r"},{"t":"hang","fen":"3rkb1r/4p1pp/1pq1bn2/pB1p4/PP1B4/1QP2N1P/5PP1/RN2K2R b KQk - 1 15","played":"Qd7","punish":"Bxd7+","gain":600,"ply":30,"ph":"middlegame","clk":459,"url":"171469194224","opp":"sunil1mishra","date":"2026-07-12","col":"b","res":"l","hour":15,"playedUci":"c6d7","replyUci":"b5d7","tc":"r"},{"t":"miss","fen":"rn3rk1/pp3ppp/4p3/q2pN3/2pPn3/P1P3Q1/5PPP/R1B1K2R b KQ - 0 16","played":"Qxc3+","best":"Nxg3","gain":600,"ply":32,"ph":"middlegame","clk":406,"url":"171475905570","opp":"aliimed","date":"2026-07-12","col":"b","res":"l","hour":18,"playedUci":"a5c3","replyUci":"e4g3","tc":"r"},{"t":"hang","fen":"r3rk2/pp3pR1/1bp4p/7q/3QP3/4K2b/P1N2P2/R7 w - - 1 26","played":"Rag1","punish":"Bxd4+","gain":600,"ply":51,"ph":"middlegame","clk":248,"url":"171523034772","opp":"Sayernnaise","date":"2026-07-13","col":"w","res":"l","hour":18,"playedUci":"a1g1","replyUci":"b6d4","tc":"r"},{"t":"hang","fen":"rn1q1rk1/pp1n1ppp/2p3b1/4R1B1/8/2N2B2/PPP2PPP/R2Q2K1 b - - 2 14","played":"Qxg5","punish":"Rxg5","gain":600,"ply":28,"ph":"middlegame","clk":498,"url":"171645776874","opp":"lldb77","date":"2026-07-16","col":"b","res":"l","hour":14,"playedUci":"d8g5","replyUci":"e5g5","tc":"r"}],"stats":{"chess_rapid":{"last":{"rating":520},"best":{"rating":665}},"chess_blitz":{"last":{"rating":301},"best":{"rating":419}},"chess_bullet":{"last":{"rating":196},"best":{"rating":380}}}};
+(function(){
+"use strict";
+const USER="airt007", T0="2026-04-01", CACHE_KEY="ertucoach_live_v1";
+const TCN={r:"Rapid",b:"Blitz",u:"Bullet",d:"Daily"};
+const tcC={bullet:"u",blitz:"b",rapid:"r",daily:"d"};
+const T0s = Date.parse(T0+"T00:00:00Z")/1000;
+
+/* ---------- Cache ---------- */
+function loadCache(){
+  try{
+    const c = JSON.parse(localStorage.getItem(CACHE_KEY));
+    if(c && c.ver===1 && Array.isArray(c.rows) && c.rows.length >= window.SEED.rows.length) return c;
+  }catch(e){}
+  return {ver:1, maxTs: window.SEED.maxTs, dict: window.SEED.dict.slice(), rows: window.SEED.rows.slice(), examples: window.SEED.examples.slice(), stats: window.SEED.stats||null, lastUpdate:null};
+}
+function saveCache(c){ try{ localStorage.setItem(CACHE_KEY, JSON.stringify(c)); }catch(e){} }
+let C = loadCache();
+
+/* ---------- Helpers ---------- */
+function G(){ // Objekt-Sicht auf rows
+  return C.rows.map(r=>({d:"2026-"+r[0],tc:r[1],col:r[2],res:r[3],myR:r[4],acc:r[5],nPly:r[6],hangs:r[7],miss:r[8],
+    pun:r[9],oppHung:r[10],castlePly:r[11],bO:r[12],bM:r[13],bE:r[14],mO:r[15],mM:r[16],mE:r[17],endPh:r[18],
+    endClk:r[19],flag:r[20],qEarly:r[21],open:C.dict[r[22]]||"?",blClk15:r[23],hour:r[24],wd:r[25],tmin:r[26],
+    url:r[27]||null,opp:r[28]||null})).sort((a,b)=>a.tmin-b.tmin);
+}
+function todayIso(){ return new Date().toLocaleString("sv-SE",{timeZone:"Europe/Berlin"}).slice(0,10); }
+function dAdd(iso,days){const t=new Date(iso+"T00:00:00Z");t.setUTCDate(t.getUTCDate()+days);return t.toISOString().slice(0,10);}
+function dDiff(a,b){return Math.round((Date.parse(b)-Date.parse(a))/86400000);}
+function fmtD(iso){return iso.slice(8,10)+"."+iso.slice(5,7)+".";}
+function clamp(x){return Math.max(0,Math.min(100,x));}
+function f1(x){return x==null?"–":(Math.round(x*10)/10).toLocaleString("de-DE");}
+function agg(gs){
+  const n=gs.length;
+  const s={n,w:0,l:0,d:0,accS:0,accN:0,hangs:0,miss:0,pun:0,oppHung:0,myPlies:0,castled:0,elig:0,bO:0,bM:0,bE:0,mO:0,mM:0,mE:0,flags:0,qE:0,bl15:0};
+  gs.forEach(g=>{s[g.res]++;if(g.acc!=null){s.accS+=g.acc;s.accN++;}
+    s.hangs+=g.hangs;s.miss+=g.miss;s.pun+=g.pun;s.oppHung+=g.oppHung;s.myPlies+=Math.floor(g.nPly/2);
+    if(g.castlePly>0)s.castled++;if(g.nPly>=20)s.elig++;
+    s.bO+=g.bO;s.bM+=g.bM;s.bE+=g.bE;s.mO+=g.mO;s.mM+=g.mM;s.mE+=g.mE;s.flags+=g.flag;s.qE+=g.qEarly;s.bl15+=g.blClk15;});
+  s.score=n?(s.w+.5*s.d)/n*100:null; s.acc=s.accN?s.accS/s.accN:null;
+  s.hangP100=s.myPlies?s.hangs/s.myPlies*100:null; s.missPg=n?s.miss/n:null;
+  s.punish=(s.pun+s.oppHung)?s.pun/(s.pun+s.oppHung)*100:null;
+  s.castle=s.elig?s.castled/s.elig*100:null;
+  s.rateO=s.mO?s.bO/s.mO*100:null;s.rateM=s.mM?s.bM/s.mM*100:null;s.rateE=s.mE?s.bE/s.mE*100:null;
+  s.flagPct=n?s.flags/n*100:null;s.qEPct=n?s.qE/n*100:null;
+  return s;
+}
+
+/* ---------- Analyzer (nur für neue Partien, lädt chess.js on demand) ---------- */
+let ChessLib=null;
+async function ensureChess(){
+  if(ChessLib) return ChessLib;
+  const m = await import("https://cdn.jsdelivr.net/npm/chess.js@1.4.0/+esm");
+  ChessLib = m.Chess; return ChessLib;
+}
+const V={p:100,n:300,b:300,r:500,q:900,k:20000};
+function seeAfter(g,sq){
+  const caps=g.moves({verbose:true}).filter(m=>m.to===sq&&m.captured);
+  if(!caps.length)return 0;
+  caps.sort((a,b)=>V[a.piece]-V[b.piece]);
+  const m=caps[0]; g.move(m);
+  const v=V[m.captured]-seeAfter(g,sq); g.undo();
+  return Math.max(0,v);
+}
+function capGain(g,m){g.move(m);const v=V[m.captured]-seeAfter(g,m.to);g.undo();return v;}
+function bestOppGain(g){let best=0,bm=null;
+  for(const m of g.moves({verbose:true})){if(!m.captured)continue;const v=capGain(g,m);if(v>best){best=v;bm=m;}}
+  return {gain:best,san:bm?bm.san:null,uci:bm?(bm.from+bm.to+(bm.promotion||"")):null};}
+function material(g){let np=0;for(const row of g.board())for(const c of row){if(c&&c.type!=="p"&&c.type!=="k")np+=V[c.type];}return np;}
+function phaseOf(ply,g){if(ply<=16)return"opening";return material(g)<=1300?"endgame":"middlegame";}
+function clocks(pgn){const out=[];const re=/\[%clk ([0-9:.]+)\]/g;let m;while((m=re.exec(pgn))){const p=m[1].split(":").map(Number);let s=0;for(const x of p)s=s*60+x;out.push(s);}return out;}
+function analyzeGame(rec){
+  const Chess=ChessLib;
+  const g0=new Chess();
+  try{g0.loadPgn(rec.pgn);}catch(e){return null;}
+  const hist=g0.history({verbose:true});
+  const myCol=rec.white.username.toLowerCase()===USER?"w":"b";
+  const clk=clocks(rec.pgn);
+  const g=new Chess();
+  let missedCaps=0,hangs=0,oppHung=0,punished=0,castlePly=0,qEarly=false,pending=null;
+  const phB={opening:0,middlegame:0,endgame:0},phMoves={opening:0,middlegame:0,endgame:0};
+  const blunders=[],examples=[];
+  for(let i=0;i<hist.length;i++){
+    const mv=hist[i],myTurn=mv.color===myCol,ply=i+1,ph=phaseOf(ply,g);
+    if(myTurn){
+      phMoves[ph]++;
+      const mine=bestOppGain(g);
+      const playedGain=mv.captured?capGain(g,mv):-1;
+      const playedUci=mv.from+mv.to+(mv.promotion||"");
+      if(pending){
+        if(playedGain>=280)punished++;
+        else if(mine.gain>=280){oppHung++;missedCaps++;
+          if(examples.length<2)examples.push({t:"miss",fen:g.fen(),played:mv.san,playedUci,best:mine.san,replyUci:mine.uci,gain:mine.gain,ply,ph,clk:clk[i]!=null?Math.round(clk[i]):null});}
+        pending=null;
+      } else if(mine.gain>=280&&playedGain<280){
+        missedCaps++;
+        if(examples.length<2)examples.push({t:"miss",fen:g.fen(),played:mv.san,playedUci,best:mine.san,replyUci:mine.uci,gain:mine.gain,ply,ph,clk:clk[i]!=null?Math.round(clk[i]):null});
+      }
+      if(mv.san==="O-O"||mv.san==="O-O-O")castlePly=ply;
+      if(mv.piece==="q"&&ply<=10)qEarly=true;
+      const fenBefore=g.fen();
+      const myCapVal=mv.captured?V[mv.captured]:0;
+      g.move(mv);
+      const opp=bestOppGain(g);
+      const net=opp.gain-myCapVal;
+      if(net>=280){
+        hangs++;phB[ph]++;
+        blunders.push({clk:clk[i]!=null?Math.round(clk[i]):null});
+        if(examples.length<2)examples.push({t:"hang",fen:fenBefore,played:mv.san,playedUci,punish:opp.san,replyUci:opp.uci,gain:net,ply,ph,clk:clk[i]!=null?Math.round(clk[i]):null});
+      }
+    } else {
+      const oppCapVal=mv.captured?V[mv.captured]:0;
+      g.move(mv);
+      const my=bestOppGain(g);
+      pending=(my.gain-oppCapVal>=280)?1:null;
+    }
+  }
+  const endPh=phaseOf(hist.length,g);
+  let lastMyIdx=-1;for(let i=hist.length-1;i>=0;i--)if(hist[i].color===myCol){lastMyIdx=i;break;}
+  const res=rec.white.username.toLowerCase()===USER?rec.white.result:rec.black.result;
+  const resN=res==="win"?"w":(["agreed","repetition","stalemate","insufficient","50move","timevsinsufficient"].includes(res)?"d":"l");
+  const acc=rec.accuracies?(myCol==="w"?rec.accuracies.white:rec.accuracies.black):null;
+  const dB=new Date(rec.end_time*1000).toLocaleString("sv-SE",{timeZone:"Europe/Berlin"});
+  const openName=((rec.pgn.match(/ECOUrl "https:\/\/www.chess.com\/openings\/([^"]+)"/)||[])[1]||rec.eco||"?").split(".")[0].replace(/-\d.*$/,"").slice(0,45);
+  let oi=C.dict.indexOf(openName); if(oi<0){C.dict.push(openName);oi=C.dict.length-1;}
+  const row=[dB.slice(5,10),tcC[rec.time_class]||"?",myCol,resN,
+    myCol==="w"?rec.white.rating:rec.black.rating, acc!=null?Math.round(acc*10)/10:null, hist.length,
+    hangs,missedCaps,punished,oppHung,castlePly,phB.opening,phB.middlegame,phB.endgame,
+    phMoves.opening,phMoves.middlegame,phMoves.endgame,endPh[0],
+    lastMyIdx>=0&&clk[lastMyIdx]!=null?Math.round(clk[lastMyIdx]):null,
+    (resN==="l"&&res==="timeout")?1:0, qEarly?1:0, oi,
+    blunders.filter(b=>b.clk!=null&&b.clk<=15).length,
+    parseInt(dB.slice(11,13),10), new Date(rec.end_time*1000).getUTCDay(), Math.round((rec.end_time-T0s)/60),
+    (rec.url||"").split("/").pop(), myCol==="w"?rec.black.username:rec.white.username];
+  const exMeta=examples.map(e=>({...e,url:(rec.url||"").split("/").pop(),opp:row[28],date:"2026-"+row[0],col:myCol,res:resN,hour:row[24],tc:row[1]}));
+  return {row, examples:exMeta, ts:rec.end_time};
+}
+
+/* ---------- Live-Update ---------- */
+const stDot=document.getElementById("stDot"),stTxt=document.getElementById("stTxt"),
+  stSpin=document.getElementById("stSpin"),pbar=document.getElementById("pbar"),pfill=document.getElementById("pfill");
+function status(txt,mode){
+  stTxt.innerHTML=txt;
+  stDot.className="dot"+(mode==="busy"?" busy":mode==="err"?" err":"");
+  stSpin.style.display=mode==="busy"?"block":"none";
+}
+async function update(){
+  status("Hole neueste Partien von Chess.com …","busy");
+  try{
+    // Stats (aktuelle Ratings) immer frisch
+    try{ C.stats = await fetch("https://api.chess.com/pub/player/"+USER+"/stats").then(r=>r.json()); }catch(e){}
+    const now=new Date();
+    const months=[];
+    const start=new Date(Math.max(C.maxTs*1000 - 86400000, Date.parse(T0)));
+    const d=new Date(Date.UTC(start.getUTCFullYear(),start.getUTCMonth(),1));
+    while(d<=now){ months.push(d.getUTCFullYear()+"/"+String(d.getUTCMonth()+1).padStart(2,"0")); d.setUTCMonth(d.getUTCMonth()+1); }
+    let fresh=[];
+    for(const m of months){
+      const j=await fetch("https://api.chess.com/pub/player/"+USER+"/games/"+m).then(r=>r.json());
+      fresh=fresh.concat((j.games||[]).filter(g=>g.rules==="chess"&&g.end_time>C.maxTs));
+    }
+    fresh.sort((a,b)=>a.end_time-b.end_time);
+    if(!fresh.length){
+      C.lastUpdate=Date.now(); saveCache(C);
+      status("Auf Stand · "+C.rows.length+" Partien · keine neuen seit letzter Analyse","ok");
+      renderAll(); return;
+    }
+    status("Analysiere "+fresh.length+" neue Partie"+(fresh.length>1?"n":"")+" …","busy");
+    pbar.style.display="block";
+    await ensureChess();
+    let done=0;
+    for(const rec of fresh){
+      const r=analyzeGame(rec);
+      if(r){ C.rows.push(r.row); C.examples=C.examples.concat(r.examples); C.maxTs=Math.max(C.maxTs,r.ts); }
+      done++; pfill.style.width=Math.round(done/fresh.length*100)+"%";
+      status("Analysiere neue Partien … "+done+"/"+fresh.length,"busy");
+      await new Promise(res=>setTimeout(res,0));
+    }
+    if(C.examples.length>400) C.examples=C.examples.slice(-400);
+    C.lastUpdate=Date.now(); saveCache(C);
+    pbar.style.display="none";
+    status("Auf Stand · "+fresh.length+" neue Partie"+(fresh.length>1?"n":"")+" analysiert · gesamt "+C.rows.length,"ok");
+    renderAll();
+  }catch(e){
+    pbar.style.display="none";
+    status("Chess.com nicht erreichbar – zeige letzten Stand ("+C.rows.length+" Partien). <span class='neut'>"+(e.message||e)+"</span>","err");
+    renderAll();
+  }
+}
+document.getElementById("btnRefresh").onclick=()=>update();
+
+/* ---------- Rendering ---------- */
+const LEVELS=[[0,250,"Neuling"],[250,400,"Anfänger"],[400,550,"Fortg. Anfänger I"],[550,700,"Fortg. Anfänger II"],
+  [700,900,"Freizeitspieler"],[900,1200,"Fortgeschritten"],[1200,1600,"Starker Amateur"],[1600,2000,"Experte"],[2000,4000,"Meister-Pfad"]];
+let charts={};
+function mkChart(id,cfg,plugins){ if(charts[id])charts[id].destroy(); charts[id]=new Chart(document.getElementById(id),plugins?{...cfg,plugins:cfg.pluginsList}:cfg); return charts[id]; }
+const state={days:14,tc:"r"};
+
+function renderAll(){
+  const g=G();
+  const today=todayIso();
+  const rap=g.filter(x=>x.tc==="r");
+  const curR = C.stats&&C.stats.chess_rapid?C.stats.chess_rapid.last.rating:(rap.length?rap[rap.length-1].myR:null);
+  const bestR = C.stats&&C.stats.chess_rapid&&C.stats.chess_rapid.best?C.stats.chess_rapid.best.rating:null;
+  // Hero + Leiter
+  let li=LEVELS.findIndex(L=>curR>=L[0]&&curR<L[1]); if(li<0)li=0;
+  const L=LEVELS[li];
+  const pct=clamp(Math.round((curR-L[0])/(L[1]-L[0])*100));
+  document.getElementById("hero").style.setProperty("--pct",pct);
+  document.getElementById("lvlN").textContent=li+1;
+  document.getElementById("lvlTitle").innerHTML="Level "+(li+1)+" · "+L[2]+" <span style='color:var(--mut);font-weight:400;font-size:15px'>(Rapid "+L[0]+"–"+L[1]+")</span>";
+  document.getElementById("xpTxt").innerHTML="<b>"+curR+" / "+L[1]+"</b> – noch <b>"+(L[1]-curR)+" Punkte</b> bis Level "+(li+2)+(bestR?" · Bestwert: <b>"+bestR+"</b>":"");
+  setTimeout(()=>{document.getElementById("xpFill").style.width=pct+"%";},150);
+  const bl=C.stats&&C.stats.chess_blitz?C.stats.chess_blitz.last.rating:"–";
+  const bu=C.stats&&C.stats.chess_bullet?C.stats.chess_bullet.last.rating:"–";
+  document.getElementById("ratings").innerHTML=
+    "<div class='r'>Rapid <b>"+curR+"</b></div><div class='r'>Blitz <b>"+bl+"</b></div><div class='r'>Bullet <b>"+bu+"</b></div>"+
+    "<div class='r'>Partien analysiert <b>"+g.length+"</b></div>";
+  document.getElementById("ladder").innerHTML=LEVELS.map((Lx,i)=>{
+    const cls=i<li?"done":(i===li?"now":"");
+    return "<div class='rung "+cls+"'><div class='ln'>Level "+(i+1)+(i===li?" · DU":i<li?" ✓":"")+"</div><div class='lt'>"+Lx[2]+"</div><div class='lr'>"+(Lx[1]>=4000?"> 2000":Lx[0]+"–"+Lx[1])+"</div></div>";
+  }).join("");
+  // Gates (letzte 14 Tage Rapid)
+  const g14=rap.filter(x=>x.d>=dAdd(today,-14));
+  const a14=agg(g14);
+  let streak=0,maxStreak=0;
+  g14.forEach(x=>{if(x.res==="l"){streak++;maxStreak=Math.max(maxStreak,streak);}else streak=0;});
+  const gates=[
+    ["Wachsamkeit", a14.hangP100!=null&&a14.hangP100<=5.5, f1(a14.hangP100)+" Hänger/100 (Ziel ≤ 5,5)"],
+    ["Bestrafung", a14.punish!=null&&a14.punish>=65, f1(a14.punish)+" % (Ziel ≥ 65 %)"],
+    ["Rochade", a14.castle!=null&&a14.castle>=70, f1(a14.castle)+" % (Ziel ≥ 70 %)"],
+    ["Zeitmanagement", a14.flagPct!=null&&a14.flagPct<8, f1(a14.flagPct)+" % Zeitniederlagen (Ziel < 8 %)"],
+    ["Serien-Disziplin", g14.length>0&&maxStreak<=3, "längste Verlustserie: "+maxStreak+" (Ziel ≤ 3)"]
+  ];
+  const passed=gates.filter(x=>x[1]).length;
+  document.getElementById("gatesSub").textContent="(letzte 14 Tage Rapid, n="+g14.length+") · "+passed+"/5 erfüllt";
+  document.getElementById("gates").innerHTML=gates.map(x=>
+    "<div class='gate "+(x[1]?"ok":"no")+"'><span class='s "+(x[1]?"up":"down")+"'>"+(x[1]?"✓":"✗")+" "+x[0]+"</span><br>"+x[2]+"</div>").join("");
+  // Rating-Chart (90 T)
+  const r90=rap.filter(x=>x.d>=dAdd(today,-90));
+  mkChart("ratingChart",{type:"line",
+    data:{datasets:[{data:r90.map((x,i)=>({x:i,y:x.myR,d:x.d})),borderColor:"#4493f8",pointRadius:0,borderWidth:2,tension:.25}]},
+    options:{responsive:true,maintainAspectRatio:false,parsing:false,animation:{duration:700},
+      scales:{x:{type:"linear",ticks:{display:false},grid:{color:"#212c38"}},y:{ticks:{color:"#9aa9b8"},grid:{color:"#2c3a48"}}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{title:it=>it.length?fmtD(it[0].raw.d):"",label:it=>"Rating: "+it.raw.y}}}}});
+  renderSkills();
+  renderTimes();
+  renderKino();
+  renderLast();
+  document.getElementById("cacheInfo").textContent="Browser-Cache: "+g.length+" Partien · letzte Aktualisierung: "+(C.lastUpdate?new Date(C.lastUpdate).toLocaleString("de-DE"):"–")+" · neueste Partie: "+(g.length?fmtD(g[g.length-1].d)+" "+g[g.length-1].hour+" Uhr":"–");
+}
+
+function medal(val,th,invert){
+  if(val==null)return["–","m-bronze"];
+  const[go,si,br]=th;
+  if(invert){if(val<=go)return["Gold","m-gold"];if(val<=si)return["Silber","m-silber"];if(val<=br)return["Bronze","m-bronze"];return["Ausbaustufe","m-rot"];}
+  if(val>=go)return["Gold","m-gold"];if(val>=si)return["Silber","m-silber"];if(val>=br)return["Bronze","m-bronze"];return["Ausbaustufe","m-rot"];
+}
+function delta(cur,prev,invert,unit){
+  if(cur==null||prev==null)return'<span class="dl neut">–</span>';
+  const d=cur-prev;const good=invert?d<0:d>0;
+  const cls=Math.abs(d)<0.05?"neut":(good?"up":"down");
+  const arrow=Math.abs(d)<0.05?"±":(d>0?"▲":"▼");
+  return'<span class="dl '+cls+'">'+arrow+" "+f1(Math.abs(d))+(unit||"")+" vs. Vorfenster</span>";
+}
+function renderSkills(){
+  const g=G(), today=todayIso();
+  const from = state.days===0 ? "2026-04-08" : dAdd(today,-state.days);
+  const cur=g.filter(x=>x.d>=from&&(state.tc==="all"||x.tc===state.tc));
+  const pf=dAdd(from,-(state.days||dDiff("2026-04-08",today)));
+  const prev=g.filter(x=>x.d>=pf&&x.d<from&&(state.tc==="all"||x.tc===state.tc));
+  const a=agg(cur),b=agg(prev);
+  document.getElementById("finfo").textContent=cur.length+" Partien ("+(state.tc==="all"?"alle":TCN[state.tc])+") seit "+fmtD(from);
+  document.getElementById("cmpline").textContent=prev.length?("Vergleichsfenster: "+fmtD(pf)+" – "+fmtD(dAdd(from,-1))+" ("+prev.length+" Partien).") : "";
+  const rr=cur.filter(x=>state.tc==="all"?x.tc==="r":true);
+  const r0=rr.length?rr[0].myR:null,r1=rr.length?rr[rr.length-1].myR:null;
+  document.getElementById("kpis").innerHTML=[
+    {v:a.n,l:"Partien",d:""},
+    {v:f1(a.score)+" %",l:"Score",d:delta(a.score,b.score,false," %-P.")},
+    {v:r1!=null?r1:"–",l:"Rating am Ende",d:(r0!=null&&r1!=null)?'<span class="dl '+(r1>=r0?"up":"down")+'">'+(r1>=r0?"▲":"▼")+" "+Math.abs(r1-r0)+" im Zeitraum</span>":""},
+    {v:f1(a.acc),l:"Accuracy (n="+a.accN+")",d:delta(a.acc,b.acc,false)},
+    {v:f1(a.hangP100),l:"Hänger / 100 Züge",d:delta(a.hangP100,b.hangP100,true)},
+    {v:f1(a.punish)+" %",l:"Bestrafungsquote",d:delta(a.punish,b.punish,false," %-P.")},
+    {v:f1(a.castle)+" %",l:"Rochade",d:delta(a.castle,b.castle,false," %-P.")},
+    {v:a.flags,l:"Zeitniederlagen",d:delta(a.flags,b.flags,true)}
+  ].map(k=>'<div class="kpi"><div class="v">'+k.v+'</div><div class="l">'+k.l+"</div>"+k.d+"</div>").join("");
+  function sc(name,valTxt,pct,med,next,color){
+    return '<div class="skill"><div class="head"><h3>'+name+'</h3><span class="medal '+med[1]+'">'+med[0]+'</span></div>'+
+      '<div class="val">'+valTxt+'</div><div class="bar"><i style="width:'+clamp(pct)+'%;background:'+color+'"></i></div>'+
+      '<div class="next">'+next+"</div></div>";
+  }
+  document.getElementById("skillGrid").innerHTML=
+    sc("Taktik-Wachsamkeit",f1(a.hangP100)+" <span style='font-size:12px;color:var(--mut)'>Hänger/100</span>",100-(a.hangP100||10)*10,medal(a.hangP100,[4.5,6,8],true),"Gold ab ≤ 4,5","var(--acc)")+
+    sc("Bestrafung",f1(a.punish)+" %",a.punish,medal(a.punish,[75,65,55],false),"Gold ab 75 %, Silber ab 65 %","var(--warn)")+
+    sc("Eröffnung",f1(a.rateO)+" <span style='font-size:12px;color:var(--mut)'>Fehler/100 Eröffnungszüge</span>",100-(a.rateO||5)*20,medal(a.rateO,[1,2,3.5],true),"Gold ab ≤ 1,0","var(--good)")+
+    sc("Mittelspiel",f1(a.rateM)+" <span style='font-size:12px;color:var(--mut)'>Fehler/100 Mittelspielzüge</span>",100-(a.rateM||12)*7,medal(a.rateM,[5,8,11],true),"Gold ab ≤ 5 · hier passieren die meisten Fehler","var(--acc)")+
+    sc("Zeitmanagement",f1(a.flagPct)+" % <span style='font-size:12px;color:var(--mut)'>Zeitniederlagen</span>",100-(a.flagPct||20)*4,medal(a.flagPct,[3,8,15],true),"Gold ab ≤ 3 %","var(--good)")+
+    sc("Rochade-Disziplin",f1(a.castle)+" %",a.castle,medal(a.castle,[80,70,55],false),"Gold ab 80 %","var(--acc)");
+  const cats=x=>x.n?{
+    "Eröffnung":clamp(100-18*(x.rateO||0)-0.25*(100-(x.castle||0))-0.1*(x.qEPct||0)),
+    "Mittelspiel":clamp(100-7*(x.rateM||0)),
+    "Endspiel":x.rateE!=null?clamp(100-18*x.rateE):null,
+    "Taktik":clamp(0.65*(x.punish||0)+0.35*clamp(100-30*(x.missPg||0))),
+    "Strategie":clamp(0.35*(x.castle||0)+0.15*(100-(x.qEPct||0))+0.5*(x.acc!=null?x.acc:60)),
+    "Zeit":clamp(100-1.2*(x.flagPct||0)-10*((x.bl15/(x.n||1))||0))
+  }:null;
+  const ca=cats(a),cb=cats(b);
+  const labels=ca?Object.keys(ca).filter(k=>ca[k]!=null):[];
+  mkChart("radar",{type:"radar",
+    data:{labels,datasets:[
+      {label:"Aktuell",data:labels.map(k=>ca[k]),borderColor:"#4493f8",backgroundColor:"rgba(68,147,248,.22)",pointBackgroundColor:"#4493f8",borderWidth:2},
+      {label:"Vorfenster",data:labels.map(k=>cb?cb[k]:null),borderColor:"#9aa9b8",backgroundColor:"rgba(154,169,184,.10)",pointBackgroundColor:"#9aa9b8",borderWidth:1.5,borderDash:[5,4]}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:800},
+      scales:{r:{min:0,max:100,ticks:{stepSize:25,color:"#9aa9b8",backdropColor:"transparent",font:{size:10}},grid:{color:"#2c3a48"},angleLines:{color:"#2c3a48"},pointLabels:{color:"#e9eef3",font:{size:12,weight:600}}}},
+      plugins:{legend:{labels:{color:"#9aa9b8",boxWidth:14}}}}});
+  const tw=g.filter(x=>x.d>=dAdd(todayIso(),-70)&&(state.tc==="all"||x.tc===state.tc));
+  const wk={};
+  tw.forEach(x=>{const t=new Date(x.d+"T00:00:00Z");const wd2=(t.getUTCDay()+6)%7;t.setUTCDate(t.getUTCDate()-wd2);const k=t.toISOString().slice(0,10);(wk[k]=wk[k]||[]).push(x);});
+  const keys=Object.keys(wk).sort();
+  mkChart("trendChart",{type:"bar",
+    data:{labels:keys.map(k=>"KW "+fmtD(k)),datasets:[
+      {type:"bar",label:"Hänger/100",data:keys.map(k=>{const x=agg(wk[k]);return x.hangP100!=null?Math.round(x.hangP100*10)/10:null;}),backgroundColor:"rgba(240,86,58,.55)",borderRadius:4,yAxisID:"y"},
+      {type:"line",label:"Score %",data:keys.map(k=>{const x=agg(wk[k]);return x.score!=null?Math.round(x.score):null;}),borderColor:"#3fb950",backgroundColor:"#3fb950",yAxisID:"y2",tension:.3,spanGaps:true}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:700},
+      scales:{x:{ticks:{color:"#9aa9b8",font:{size:10},maxRotation:45},grid:{display:false}},
+        y:{position:"left",ticks:{color:"#f0563a"},grid:{color:"#2c3a48"},beginAtZero:true},
+        y2:{position:"right",min:0,max:100,ticks:{color:"#3fb950"},grid:{display:false}}},
+      plugins:{legend:{labels:{color:"#9aa9b8",boxWidth:14}}}}});
+}
+function scoreColor(sc){if(sc==null)return null;const t=Math.max(0,Math.min(1,(sc-30)/40));
+  const r1=[240,86,58],g1=[63,185,80];return"rgb("+r1.map((v,i)=>Math.round(v+(g1[i]-v)*t)).join(",")+")";}
+function renderTimes(){
+  const today=todayIso();
+  const g=G().filter(x=>x.tc==="r"&&x.d>=dAdd(today,-60));
+  const hrs={};
+  g.forEach(x=>{(hrs[x.hour]=hrs[x.hour]||[]).push(x);});
+  let html="";
+  const slotAgg={};
+  for(let h=8;h<=25;h++){
+    const hh=h%24, gs=hrs[hh]||[];
+    if(!gs.length){html+='<div class="hmc mut"><div class="h">'+hh+':00</div><div class="s">–</div></div>';continue;}
+    const c={w:0,l:0,d:0};gs.forEach(x=>c[x.res]++);
+    const sc=Math.round((c.w+.5*c.d)/gs.length*100);
+    const small=gs.length<5;
+    html+='<div class="hmc'+(small?' mut':'')+'" style="background:'+scoreColor(sc)+'"><div class="h">'+hh+':00</div><div class="s">'+sc+'%</div><div class="n">n='+gs.length+(small?' ⚠':'')+'</div></div>';
+  }
+  document.getElementById("hourMap").innerHTML=html;
+  // Slot-Empfehlung
+  const slots=[["Vormittag (8–13)",[8,9,10,11,12]],["Nachmittag (13–17)",[13,14,15,16]],["Vorabend (17–19)",[17,18]],["Abend (19–23)",[19,20,21,22]],["Nacht (23–3)",[23,0,1,2]]];
+  const res=slots.map(([name,hh])=>{
+    const gs=g.filter(x=>hh.includes(x.hour));
+    if(gs.length<8)return null;
+    const c={w:0,l:0,d:0};gs.forEach(x=>c[x.res]++);
+    return {name,n:gs.length,sc:Math.round((c.w+.5*c.d)/gs.length*100)};
+  }).filter(Boolean).sort((a,b)=>b.sc-a.sc);
+  if(res.length>=2){
+    const best=res[0],worst=res[res.length-1];
+    document.getElementById("slotAdvice").innerHTML="<p><b class='up'>Bestes Fenster: "+best.name+"</b> ("+best.sc+" % in "+best.n+" Partien) · <b class='down'>Risiko-Zone: "+worst.name+"</b> ("+worst.sc+" % in "+worst.n+" Partien). Faustregel: gewertete Partien ins beste Fenster legen, in der Risiko-Zone höchstens Puzzles.</p>";
+  } else document.getElementById("slotAdvice").innerHTML="";
+  // Sessions
+  const alls=G().filter(x=>x.d>=dAdd(today,-60));
+  const sess=[];let cur=[];
+  alls.forEach(x=>{if(cur.length&&x.tmin-cur[cur.length-1].tmin>45){sess.push(cur);cur=[];}cur.push(x);});
+  if(cur.length)sess.push(cur);
+  const pos={};
+  sess.forEach(s=>s.forEach((x,i)=>{const p=Math.min(i+1,7);(pos[p]=pos[p]||[]).push(x);}));
+  const data=[1,2,3,4,5,6,7].map(p=>{const gs=pos[p]||[];if(gs.length<4)return null;const c={w:0,l:0,d:0};gs.forEach(x=>c[x.res]++);return Math.round((c.w+.5*c.d)/gs.length*100);});
+  mkChart("sessChart",{type:"bar",
+    data:{labels:["1","2","3","4","5","6","7+"],datasets:[{data,backgroundColor:data.map(v=>v!=null&&v<45?"rgba(240,86,58,.7)":"rgba(68,147,248,.7)"),borderRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:700},
+      scales:{x:{ticks:{color:"#9aa9b8"},grid:{display:false},title:{display:true,text:"Partie-Nr. in der Session",color:"#9aa9b8",font:{size:11}}},
+        y:{min:0,max:80,ticks:{color:"#9aa9b8",callback:v=>v+"%"},grid:{color:"#2c3a48"}}},
+      plugins:{legend:{display:false}}}});
+  // nach 2 Niederlagen
+  let n2=0,w2=0;
+  sess.forEach(s=>{let st=0;s.forEach(x=>{if(st>=2){n2++;w2+=x.res==="w"?1:(x.res==="d"?0.5:0);}if(x.res==="l")st++;else st=0;});});
+  document.getElementById("sessNote").textContent=n2>=8?("Sessions = Partien mit < 45 Min Abstand (60 Tage, alle Formate). Nach 2 Niederlagen in Folge holst du nur noch "+Math.round(w2/n2*100)+" % ("+n2+" Fälle) – Stopp-Regel beachten!"):"Sessions = Partien mit < 45 Min Abstand (letzte 60 Tage).";
+  // Wochentag
+  const wdn=["So","Mo","Di","Mi","Do","Fr","Sa"],order=[1,2,3,4,5,6,0];
+  const by={};
+  g.forEach(x=>{(by[x.wd]=by[x.wd]||[]).push(x);});
+  const wdata=order.map(w=>{const gs=by[w]||[];if(gs.length<4)return null;const c={w:0,l:0,d:0};gs.forEach(x=>c[x.res]++);return Math.round((c.w+.5*c.d)/gs.length*100);});
+  mkChart("wdChart",{type:"bar",
+    data:{labels:order.map(w=>wdn[w]),datasets:[{data:wdata,backgroundColor:wdata.map(v=>v!=null&&v<45?"rgba(240,86,58,.7)":(v>=55?"rgba(63,185,80,.7)":"rgba(68,147,248,.7)")),borderRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:700},
+      scales:{x:{ticks:{color:"#9aa9b8"},grid:{display:false}},y:{min:0,max:80,ticks:{color:"#9aa9b8",callback:v=>v+"%"},grid:{color:"#2c3a48"}}},
+      plugins:{legend:{display:false}}}});
+}
+
+/* ---------- Kino ---------- */
+const UNI={p:"♟",n:"♞",b:"♝",r:"♜",q:"♛",k:"♚"};
+const boardEl=document.getElementById("board");
+let EX=[],exIdx=0,playing=true,stepTimers=[];
+function sqXY(sq,flip){const f=sq.charCodeAt(0)-97,r=parseInt(sq[1],10)-1;const x=flip?7-f:f,y=flip?r:7-r;return[x*12.5,y*12.5];}
+function renderBoard(fen,flip){
+  boardEl.innerHTML="";
+  for(let y=0;y<8;y++)for(let x=0;x<8;x++){
+    const d=document.createElement("div");
+    d.className="sq "+(((x+y)%2===0)?"l":"d");
+    d.style.left=(x*12.5)+"%";d.style.top=(y*12.5)+"%";
+    const file=flip?7-x:x,rank=flip?y:7-y;
+    d.dataset.sq=String.fromCharCode(97+file)+(rank+1);
+    boardEl.appendChild(d);
+  }
+  const pieces={};
+  const place=fen.split(" ")[0].split("/");
+  for(let r=0;r<8;r++){let f=0;
+    for(const ch of place[r]){
+      if(/\d/.test(ch)){f+=parseInt(ch,10);continue;}
+      const sq=String.fromCharCode(97+f)+(8-r);
+      const el=document.createElement("div");
+      el.className="pc "+(ch===ch.toUpperCase()?"w":"b");
+      el.textContent=UNI[ch.toLowerCase()];
+      const[x,y]=sqXY(sq,flip);
+      el.style.transform="translate("+(x*8)+"%,"+(y*8)+"%)";
+      boardEl.appendChild(el);
+      pieces[sq]=el;f++;
+    }}
+  return pieces;
+}
+function hl(sq,cls){boardEl.querySelectorAll(".sq").forEach(el=>{if(el.dataset.sq===sq)el.classList.add(cls);});}
+function clearHl(){boardEl.querySelectorAll(".sq").forEach(el=>el.classList.remove("hlR","hlG"));}
+function animMove(pieces,uci,flip){
+  const from=uci.slice(0,2),to=uci.slice(2,4);
+  const mover=pieces[from];if(!mover)return;
+  if(pieces[to])pieces[to].classList.add("gone");
+  const[x,y]=sqXY(to,flip);
+  mover.style.transform="translate("+(x*8)+"%,"+(y*8)+"%)";
+  if(uci.length===5)setTimeout(()=>{mover.textContent=UNI[uci[4]];},400);
+  pieces[to]=mover;delete pieces[from];
+}
+function renderKino(){
+  const today=todayIso();
+  let pool=C.examples.filter(e=>e.res==="l"&&(e.tc==="r"||e.tc==null)&&e.date>=dAdd(today,-30));
+  if(pool.length<6) pool=C.examples.filter(e=>e.res==="l");
+  pool=pool.slice().sort((a,b)=>b.gain-a.gain);
+  const seen={},sel=[];
+  for(const e of pool){if(seen[e.url])continue;seen[e.url]=1;sel.push(e);if(sel.length>=12)break;}
+  EX=sel;
+  if(!EX.length){document.getElementById("exMeta").innerHTML="<p class='sub'>Noch keine Beispiele im Zeitraum.</p>";return;}
+  showExample(0);
+}
+function showExample(i){
+  if(!EX.length)return;
+  exIdx=(i+EX.length)%EX.length;
+  stepTimers.forEach(clearTimeout);stepTimers=[];
+  const e=EX[exIdx];
+  const flip=e.col==="b";
+  const mvNo=Math.ceil(e.ply/2);
+  const typ=e.t==="hang"
+    ?"Figur eingestellt: <span class='mv mvbad'>"+mvNo+". "+e.played+"</span> erlaubt <span class='mv mvgood'>"+e.punish+"</span> (−"+(e.gain/100)+" Bauerneinheiten)."
+    :"Gewinnzug verpasst: statt <span class='mv mvgood'>"+e.best+"</span> (+"+(e.gain/100)+") kam <span class='mv mvbad'>"+e.played+"</span>.";
+  document.getElementById("exMeta").innerHTML=
+    "<h3 style='margin-top:0'>Moment "+(exIdx+1)+"/"+EX.length+" · "+fmtD(e.date)+(e.hour!=null?" · "+e.hour+" Uhr":"")+"</h3>"+
+    "<p>"+typ+"</p>"+
+    "<table style='font-size:13px'>"+
+    (e.opp?"<tr><td style='color:var(--mut)'>Gegner</td><td>"+e.opp+"</td></tr>":"")+
+    "<tr><td style='color:var(--mut)'>Farbe / Phase</td><td>"+(e.col==="w"?"Weiß":"Schwarz")+" · "+(e.ph==="opening"?"Eröffnung":e.ph==="endgame"?"Endspiel":"Mittelspiel")+" · Zug "+mvNo+"</td></tr>"+
+    "<tr><td style='color:var(--mut)'>Restzeit</td><td>"+(e.clk!=null?Math.floor(e.clk/60)+":"+String(e.clk%60).padStart(2,"0")+" Min":"–")+"</td></tr>"+
+    (e.url?"<tr><td style='color:var(--mut)'>Partie</td><td><a href='https://www.chess.com/game/live/"+e.url+"' target='_blank' rel='noopener'>auf Chess.com öffnen ↗</a></td></tr>":"")+
+    "</table>"+
+    "<p class='catnote'>"+(e.t==="hang"?"Ritual-Frage 2: „Was kann mich JETZT schlagen?“":"Ritual-Frage 3: „Was hängt bei IHM?“")+"</p>";
+  document.getElementById("dots").innerHTML=EX.map((_,j)=>"<span class='"+(j===exIdx?"on":"")+"' data-i='"+j+"'></span>").join("");
+  const lbl=document.getElementById("stepLbl");
+  function cycle(){
+    const pieces=renderBoard(e.fen,flip);
+    clearHl();
+    lbl.textContent="Stellung vor Zug "+mvNo;
+    stepTimers.push(setTimeout(()=>{hl(e.playedUci.slice(0,2),"hlR");hl(e.playedUci.slice(2,4),"hlR");lbl.textContent="Gespielt: "+e.played;animMove(pieces,e.playedUci,flip);},1100));
+    if(e.t==="hang"){
+      stepTimers.push(setTimeout(()=>{hl(e.replyUci.slice(0,2),"hlG");hl(e.replyUci.slice(2,4),"hlG");lbl.textContent="Widerlegung: "+e.punish;animMove(pieces,e.replyUci,flip);},2600));
+    }else{
+      stepTimers.push(setTimeout(()=>{renderBoard(e.fen,flip);clearHl();lbl.textContent="Besser wäre gewesen …";},2600));
+      stepTimers.push(setTimeout(()=>{const p2=renderBoard(e.fen,flip);hl(e.replyUci.slice(0,2),"hlG");hl(e.replyUci.slice(2,4),"hlG");lbl.textContent="Stark: "+e.best;animMove(p2,e.replyUci,flip);},3200));
+    }
+    if(playing)stepTimers.push(setTimeout(()=>showExample(exIdx+1),5600));
+    else stepTimers.push(setTimeout(cycle,5600));
+  }
+  cycle();
+}
+document.getElementById("bPrev").onclick=()=>showExample(exIdx-1);
+document.getElementById("bNext").onclick=()=>showExample(exIdx+1);
+document.getElementById("bPlay").onclick=function(){playing=!playing;this.textContent=playing?"Pause":"Abspielen";showExample(exIdx);};
+document.getElementById("dots").addEventListener("click",ev=>{if(ev.target.dataset.i!=null)showExample(parseInt(ev.target.dataset.i,10));});
+
+/* ---------- Letzte Partien ---------- */
+function renderLast(){
+  const g=G().slice(-15).reverse();
+  const rows=g.map(x=>{
+    const resPill=x.res==="w"?"<span class='pill pg'>Sieg</span>":x.res==="d"?"<span class='pill pw'>Remis</span>":"<span class='pill pb'>Niederlage</span>";
+    const err=(x.hangs||x.miss)?("<span class='down'>"+x.hangs+" Hänger"+(x.miss?", "+x.miss+" verpasst":"")+"</span>"):"<span class='up'>sauber</span>";
+    return "<tr><td>"+fmtD(x.d)+" "+x.hour+" Uhr</td><td>"+TCN[x.tc]+"</td><td>"+(x.col==="w"?"Weiß":"Schwarz")+(x.opp?" vs. "+x.opp:"")+"</td>"+
+      "<td>"+resPill+"</td><td class='num'>"+x.myR+"</td><td>"+err+"</td>"+
+      "<td>"+(x.url?"<a href='https://www.chess.com/game/live/"+x.url+"' target='_blank' rel='noopener'>öffnen ↗</a>":"")+"</td></tr>";
+  }).join("");
+  document.getElementById("lastGames").innerHTML="<table><tr><th>Wann</th><th>Format</th><th>Partie</th><th>Ergebnis</th><th class='num'>Rating</th><th>Fehler-Check</th><th></th></tr>"+rows+"</table>";
+}
+
+/* ---------- Filter-Events + Start ---------- */
+document.getElementById("segDays").addEventListener("click",ev=>{
+  const b=ev.target.closest("button");if(!b)return;
+  document.querySelectorAll("#segDays button").forEach(x=>x.classList.remove("on"));b.classList.add("on");
+  state.days=parseInt(b.dataset.days,10);renderSkills();
+});
+document.getElementById("segTc").addEventListener("click",ev=>{
+  const b=ev.target.closest("button");if(!b)return;
+  document.querySelectorAll("#segTc button").forEach(x=>x.classList.remove("on"));b.classList.add("on");
+  state.tc=b.dataset.tc;renderSkills();
+});
+
+/* ---------- Engine-Panel (data/engine.json vom Nacht-Job, optional) ---------- */
+async function loadEngine(){
+  try{
+    const r=await fetch("data/engine.json",{cache:"no-store"});
+    if(!r.ok)return;
+    const j=await r.json();
+    const games=Object.entries((j&&j.games)||{}).map(([id,g])=>({id,...g}));
+    document.getElementById("engineSec").style.display="block";
+    if(!games.length){
+      document.getElementById("engineNote").textContent="Engine-Daten noch leer – der erste nächtliche Lauf (oder ein manueller Start unter Actions → Nightly Engine Analysis) füllt dieses Panel automatisch.";
+      return;
+    }
+    renderEngine(games,j.updated);
+  }catch(e){/* kein engine.json (z. B. lokale Datei) – Panel bleibt aus */}
+}
+function renderEngine(games,updated){
+  const today=todayIso();
+  const rap=games.filter(g=>g.tc==="r"&&g.acpl!=null).sort((a,b)=>(a.ts||0)-(b.ts||0));
+  if(!rap.length){document.getElementById("engineNote").textContent="Noch keine Rapid-Partien im Engine-Datensatz.";return;}
+  const d30=dAdd(today,-30),d60=dAdd(today,-60);
+  const cur=rap.filter(g=>g.d>=d30), prev=rap.filter(g=>g.d>=d60&&g.d<d30);
+  const avg=(gs,f)=>{const v=gs.map(f).filter(x=>x!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;};
+  const aC=avg(cur,g=>g.acpl), aP=avg(prev,g=>g.acpl);
+  const bC=avg(cur,g=>g.b), bP=avg(prev,g=>g.b);
+  const mmC=cur.reduce((s,g)=>s+(g.mm||0),0);
+  const aM=avg(cur,g=>g.aM), aE=avg(cur,g=>g.aE), aO=avg(cur,g=>g.aO);
+  document.getElementById("engineSub").textContent="(Stockfish Tiefe 12 · "+games.length+" Partien analysiert · Stand "+(updated?new Date(updated).toLocaleString("de-DE"):"–")+")";
+  document.getElementById("engineKpis").innerHTML=[
+    {v:f1(aC),l:"ACPL letzte 30 T (Rapid)",d:delta(aC,aP,true)},
+    {v:f1(bC),l:"Engine-Blunder / Partie (≥200 cp)",d:delta(bC,bP,true)},
+    {v:mmC,l:"Verpasste Matts (30 T)",d:""},
+    {v:f1(aO)+" / "+f1(aM)+" / "+f1(aE),l:"ACPL Eröffnung / Mittelspiel / Endspiel",d:""}
+  ].map(k=>'<div class="kpi"><div class="v">'+k.v+'</div><div class="l">'+k.l+"</div>"+k.d+"</div>").join("");
+  const wk={};
+  rap.filter(g=>g.d>=dAdd(today,-70)).forEach(g=>{
+    const t=new Date(g.d+"T00:00:00Z");const wd2=(t.getUTCDay()+6)%7;t.setUTCDate(t.getUTCDate()-wd2);
+    const k=t.toISOString().slice(0,10);(wk[k]=wk[k]||[]).push(g);});
+  const keys=Object.keys(wk).sort();
+  mkChart("engineChart",{type:"bar",
+    data:{labels:keys.map(k=>"KW "+fmtD(k)),datasets:[
+      {type:"bar",label:"Blunder/Partie",data:keys.map(k=>{const v=avg(wk[k],g=>g.b);return v!=null?Math.round(v*100)/100:null;}),backgroundColor:"rgba(240,86,58,.55)",borderRadius:4,yAxisID:"y2"},
+      {type:"line",label:"ACPL",data:keys.map(k=>{const v=avg(wk[k],g=>g.acpl);return v!=null?Math.round(v):null;}),borderColor:"#4493f8",backgroundColor:"#4493f8",yAxisID:"y",tension:.3,spanGaps:true}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:700},
+      scales:{x:{ticks:{color:"#9aa9b8",font:{size:10},maxRotation:45},grid:{display:false}},
+        y:{position:"left",ticks:{color:"#4493f8"},grid:{color:"#2c3a48"},beginAtZero:true},
+        y2:{position:"right",ticks:{color:"#f0563a"},grid:{display:false},beginAtZero:true}},
+      plugins:{legend:{labels:{color:"#9aa9b8",boxWidth:14}}}}});
+  const worst=rap.filter(g=>g.w&&g.d>=d60).sort((a,b)=>b.w.cpl-a.w.cpl).slice(0,6);
+  document.getElementById("engineWorst").innerHTML=worst.length?("<table><tr><th>Wann</th><th>Zug</th><th>Besser</th><th class='num'>Verlust</th><th></th></tr>"+
+    worst.map(g=>"<tr><td>"+fmtD(g.d)+"</td><td><span class='mv mvbad'>"+Math.ceil(g.w.ply/2)+". "+g.w.san+"</span></td><td><span class='mv mvgood'>"+(g.w.bestSan||"–")+"</span></td><td class='num'>−"+(g.w.cpl/100).toLocaleString("de-DE")+"</td>"+
+    "<td><a href='https://www.chess.com/game/live/"+g.id+"' target='_blank' rel='noopener'>öffnen ↗</a></td></tr>").join("")+"</table>"):"<p class='sub'>Keine groben Blunder im Zeitraum – stark!</p>";
+  document.getElementById("engineNote").textContent="Hinweis: Die Engine-Zahlen (ACPL, Blunder ≥ 200 cp) sind präziser als die Browser-Heuristik weiter oben – beide Sichten ergänzen sich. Der Nacht-Job analysiert max. 150 Partien pro Lauf und arbeitet Rückstände automatisch ab.";
+  renderTurning(games);
+}
+
+/* ---------- Wendepunkte ---------- */
+const MOTIF={
+  gabel:{n:"Springergabel",t:"Ein Springer greift zwei Ziele gleichzeitig an – meist König plus Dame oder Turm. Eines davon fällt zwingend.",
+    c:"DER Klassiker zwischen 600 und 1000: Felder wie c7/c2, f7/f2 und e6/e3 im Auge behalten – bei dir und beim Gegner."},
+  doppelangriff:{n:"Doppelangriff",t:"Ein Zug, zwei Drohungen – der Gegner kann nur eine parieren.",
+    c:"Auf diesem Level wird fast immer nur die lauteste Drohung gesehen. Wer beide stellt, gewinnt Material."},
+  haengend:{n:"Hängende Figur",t:"Eine Figur stand komplett ungedeckt und konnte einfach eingesammelt werden.",
+    c:"Häufigster Spielentscheider bis 1000 überhaupt. Ritual-Frage 3: „Was hängt bei IHM?“"},
+  fesselung:{n:"Fesselung ausnutzen",t:"Die Zielfigur durfte nicht (zurück)schlagen, weil sie gefesselt war – der Verteidiger zählte also nicht.",
+    c:"Gefesselte Verteidiger sind KEINE Verteidiger – der meist übersehene Zähltrick auf deinem Level."},
+  abzug:{n:"Abzug / Abzugsschach",t:"Eine Figur zieht weg und dahinter feuert eine zweite – zwei Angriffe in einem Zug.",
+    c:"Wird bis 1000 fast nie kommen sehen, weil man nur auf die ziehende Figur schaut."},
+  grundreihe:{n:"Grundreihenmatt",t:"Die Grundreihe war ungeschützt – Turm oder Dame dringen ein und der eigene Bauernschild wird zum Gefängnis.",
+    c:"Ab dem Mittelspiel: Luftloch (h3/h6) einplanen oder die Grundreihe doppelt decken."},
+  matt:{n:"Mattkombination",t:"Es gab eine zwingende Mattfolge.",
+    c:"Bei Königsangriffen immer erst alle Schachs rechnen – auf diesem Level hält kaum jemand eine Schachserie korrekt aus."},
+  umwandlung:{n:"Umwandlung",t:"Ein Freibauer war nicht mehr aufzuhalten.",
+    c:"Freibauern werden bis 1000 chronisch unterschätzt – „erst der Bauer, dann der Plan“."},
+  guenstiger_abtausch:{n:"Günstiger Abtausch",t:"Kleines gibt Großes: Die Abtauschfolge gewinnt netto Material.",
+    c:"Einfach durchzählen: Was steht am Ende der Schlagserie mehr auf meinem Konto?"},
+  schach_angriff:{n:"Schach mit Folgeangriff",t:"Ein Schach zwingt den König, danach fällt Material oder der Angriff rollt.",
+    c:"Zwischenschachs sind die meistvergessenen Züge zwischen 600 und 1000."},
+  technik:{n:"Technischer Gewinnweg",t:"Kein Ein-Zug-Trick, sondern die beste Fortsetzung laut Engine – Stellung halten und verwerten.",
+    c:"Nicht jeder Wendepunkt ist Taktik: Manchmal heißt der Gewinnzug einfach „ruhig bleiben“."}
+};
+function cpHuman(cp){
+  if(cp>=900)return"komplett gewonnen";
+  if(cp>=400)return"klar gewonnen";
+  if(cp>=150)return"deutlich besser";
+  if(cp>-150)return"ausgeglichen";
+  if(cp>-400)return"deutlich schlechter";
+  if(cp>-900)return"klar verloren";
+  return"komplett verloren";
+}
+let TP=[],tpIdx=0,tpPlaying=true,tpTimers=[];
+const tpBoardEl=document.getElementById("tpBoard");
+function tpRender(fen,flip){
+  tpBoardEl.innerHTML="";
+  for(let y=0;y<8;y++)for(let x=0;x<8;x++){
+    const d=document.createElement("div");
+    d.className="sq "+(((x+y)%2===0)?"l":"d");
+    d.style.left=(x*12.5)+"%";d.style.top=(y*12.5)+"%";
+    const file=flip?7-x:x,rank=flip?y:7-y;
+    d.dataset.sq=String.fromCharCode(97+file)+(rank+1);
+    tpBoardEl.appendChild(d);
+  }
+  const pieces={};
+  const place=fen.split(" ")[0].split("/");
+  for(let r=0;r<8;r++){let f=0;
+    for(const ch of place[r]){
+      if(/\d/.test(ch)){f+=parseInt(ch,10);continue;}
+      const sq=String.fromCharCode(97+f)+(8-r);
+      const el=document.createElement("div");
+      el.className="pc "+(ch===ch.toUpperCase()?"w":"b");
+      el.textContent=UNI[ch.toLowerCase()];
+      const[x,y]=sqXY(sq,flip);
+      el.style.transform="translate("+(x*8)+"%,"+(y*8)+"%)";
+      tpBoardEl.appendChild(el);
+      pieces[sq]=el;f++;
+    }}
+  return pieces;
+}
+function tpHl(sq,cls){tpBoardEl.querySelectorAll(".sq").forEach(el=>{if(el.dataset.sq===sq)el.classList.add(cls);});}
+function tpClearHl(){tpBoardEl.querySelectorAll(".sq").forEach(el=>el.classList.remove("hlR","hlG"));}
+function tpAnim(pieces,uci,flip){
+  const from=uci.slice(0,2),to=uci.slice(2,4);
+  const mover=pieces[from];if(!mover)return;
+  if(pieces[to])pieces[to].classList.add("gone");
+  const[x,y]=sqXY(to,flip);
+  mover.style.transform="translate("+(x*8)+"%,"+(y*8)+"%)";
+  if(uci.length===5)setTimeout(()=>{mover.textContent=UNI[uci[4]];},400);
+  pieces[to]=mover;delete pieces[from];
+}
+function renderTurning(games){
+  TP=[];
+  games.forEach(g=>{(g.tp||[]).forEach(t=>TP.push({...t,id:g.id,d:g.d,ts:g.ts||0,opp:g.opp,res:g.res,col:g.col,tc:g.tc}));});
+  TP.sort((a,b)=>b.ts-a.ts);
+  TP=TP.slice(0,15);
+  if(!TP.length){
+    document.getElementById("tpSec").style.display="block";
+    document.getElementById("tpMeta").innerHTML="<p class='sub'>Noch keine Wendepunkt-Daten – sie entstehen beim nächsten Nacht-Lauf (Skript-Version 2). Bei einem Backfill-Lauf werden sie für alle Partien nachgerechnet.</p>";
+    document.getElementById("motifStats").style.display="none";
+    return;
+  }
+  document.getElementById("tpSec").style.display="block";
+  // Motiv-Statistik
+  const cnt={};
+  games.forEach(g=>{(g.tp||[]).forEach(t=>{const k=t.motif||"technik";(cnt[k]=cnt[k]||{n:0,miss:0});cnt[k].n++;if(t.kind==="missedWin")cnt[k].miss++;});});
+  const order=Object.entries(cnt).sort((a,b)=>b[1].n-a[1].n);
+  const total=order.reduce((s,[,v])=>s+v.n,0);
+  const top=order[0];
+  document.getElementById("motifStats").style.display="block";
+  document.getElementById("motifStats").innerHTML="<h3 style='margin-top:0'>Deine Muster ("+total+" Wendepunkte analysiert)</h3>"+
+    order.slice(0,6).map(([k,v])=>{
+      const M=MOTIF[k]||MOTIF.technik;
+      const pct=Math.round(v.n/total*100);
+      return "<div class='catrow' style='display:flex;align-items:center;gap:12px;margin:8px 0'>"+
+        "<div style='width:170px;font-size:13px;font-weight:600'>"+M.n+"</div>"+
+        "<div style='flex:1'><div class='scorebar' style='height:8px;background:var(--card2);border-radius:5px;overflow:hidden'><i style='display:block;height:100%;width:"+pct+"%;background:var(--acc);border-radius:5px'></i></div></div>"+
+        "<div style='width:110px;text-align:right;font-size:12px;color:var(--mut)'>"+v.n+"× · "+v.miss+" verpasst</div></div>";
+    }).join("")+
+    (top?"<p class='catnote'>Dein häufigstes Muster: <b>"+(MOTIF[top[0]]||MOTIF.technik).n+"</b>. "+(MOTIF[top[0]]||MOTIF.technik).c+"</p>":"");
+  showTp(0);
+}
+function showTp(i){
+  if(!TP.length)return;
+  tpIdx=(i+TP.length)%TP.length;
+  tpTimers.forEach(clearTimeout);tpTimers=[];
+  const e=TP[tpIdx];
+  const flip=e.col==="b";
+  const mvNo=Math.ceil(e.ply/2);
+  const M=MOTIF[e.motif]||MOTIF.technik;
+  const kindTxt=e.kind==="missedWin"
+    ?"<b class='up'>Hier hättest du das Spiel gedreht.</b> Du standst "+cpHuman(e.before)+" ("+(e.before/100).toLocaleString("de-DE",{maximumFractionDigits:1})+") – nach <span class='mv mvbad'>"+e.played+"</span> war es nur noch "+cpHuman(e.after)+"."
+    :"<b class='down'>Hier ist die Partie gekippt.</b> Vorher "+cpHuman(e.before)+", nach <span class='mv mvbad'>"+e.played+"</span> "+cpHuman(e.after)+" ("+(e.after/100).toLocaleString("de-DE",{maximumFractionDigits:1})+").";
+  const mateTxt=e.mateIn?"<b>Matt in "+e.mateIn+"</b> war auf dem Brett. ":"";
+  const gapTxt=(e.gap!=null&&e.gap>=200)?(e.kind==="missedWin"?" Es gab genau <b>einen</b> Gewinnzug – diesen.":" Es gab genau <b>eine</b> Rettung – diese."):"";
+  document.getElementById("tpMeta").innerHTML=
+    "<h3 style='margin-top:0'>Wendepunkt "+(tpIdx+1)+"/"+TP.length+" · "+fmtD(e.d)+" · Zug "+mvNo+"</h3>"+
+    "<p>"+kindTxt+"</p>"+
+    "<p><span class='medal m-gold' style='margin-right:8px'>"+M.n+"</span> "+mateTxt+M.t+gapTxt+"</p>"+
+    "<p style='font-size:13px'>Stark wäre gewesen: <span class='mv mvgood'>"+(e.pvSan||[]).join(" ")+"</span></p>"+
+    "<p class='catnote'>"+M.c+"</p>"+
+    "<table style='font-size:13px'>"+
+    (e.opp?"<tr><td style='color:var(--mut)'>Gegner</td><td>"+e.opp+" · "+(e.res==="w"?"trotzdem gewonnen":e.res==="d"?"Remis":"verloren")+"</td></tr>":"")+
+    "<tr><td style='color:var(--mut)'>Partie</td><td><a href='https://www.chess.com/game/live/"+e.id+"' target='_blank' rel='noopener'>auf Chess.com öffnen ↗</a></td></tr></table>";
+  document.getElementById("tpDots").innerHTML=TP.map((_,j)=>"<span class='"+(j===tpIdx?"on":"")+"' data-i='"+j+"'></span>").join("");
+  const lbl=document.getElementById("tpStepLbl");
+  function cycle(){
+    let pieces=tpRender(e.fen,flip);
+    tpClearHl();
+    lbl.textContent="Stellung vor Zug "+mvNo;
+    tpTimers.push(setTimeout(()=>{tpHl(e.playedUci.slice(0,2),"hlR");tpHl(e.playedUci.slice(2,4),"hlR");lbl.textContent="Gespielt: "+e.played;tpAnim(pieces,e.playedUci,flip);},1100));
+    tpTimers.push(setTimeout(()=>{pieces=tpRender(e.fen,flip);tpClearHl();lbl.textContent="Die Engine spielt stattdessen …";},2700));
+    (e.pvUci||[]).slice(0,4).forEach((u,k)=>{
+      tpTimers.push(setTimeout(()=>{
+        tpClearHl();tpHl(u.slice(0,2),"hlG");tpHl(u.slice(2,4),"hlG");
+        lbl.textContent=(k%2===0?"Gewinnzug: ":"Antwort: ")+((e.pvSan||[])[k]||"");
+        tpAnim(pieces,u,flip);
+      },3400+k*950));
+    });
+    const endT=3400+Math.min((e.pvUci||[]).length,4)*950+1700;
+    if(tpPlaying)tpTimers.push(setTimeout(()=>showTp(tpIdx+1),endT));
+    else tpTimers.push(setTimeout(cycle,endT));
+  }
+  cycle();
+}
+document.getElementById("tpPrev").onclick=()=>showTp(tpIdx-1);
+document.getElementById("tpNext").onclick=()=>showTp(tpIdx+1);
+document.getElementById("tpPlay").onclick=function(){tpPlaying=!tpPlaying;this.textContent=tpPlaying?"Pause":"Abspielen";showTp(tpIdx);};
+document.getElementById("tpDots").addEventListener("click",ev=>{if(ev.target.dataset.i!=null)showTp(parseInt(ev.target.dataset.i,10));});
+
+renderAll();
+status("Letzter Stand geladen ("+C.rows.length+" Partien) – prüfe auf neue …","busy");
+update();
+loadEngine();
+})();
+</script>
+</body>
+</html>
