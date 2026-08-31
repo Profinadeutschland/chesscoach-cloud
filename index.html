@@ -130,6 +130,33 @@
   .steplabel{display:inline-block;min-width:170px;font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--mut);margin-top:6px}
   .catnote{font-size:12px;color:var(--mut);margin-top:6px}
   .foot{color:var(--mut);font-size:12.5px;border-top:1px solid var(--line);margin-top:40px;padding-top:14px}
+  /* Lernpfad */
+  .stage{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px 17px;margin:12px 0;opacity:.75}
+  .stage.done{opacity:1;border-left:4px solid var(--good)}
+  .stage.now{opacity:1;border-left:4px solid var(--acc);box-shadow:0 0 16px rgba(68,147,248,.22)}
+  .stage.next{opacity:.9}
+  .stage h3{margin:0 0 2px;font-size:15.5px;display:flex;align-items:center;gap:10px}
+  .stage .tagb{font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;padding:2px 9px;border-radius:20px;background:var(--card2);color:var(--mut)}
+  .stage.now .tagb{background:rgba(68,147,248,.16);color:var(--acc)}
+  .stage.done .tagb{background:rgba(63,185,80,.16);color:var(--good)}
+  .stage p{font-size:13.5px;margin:8px 0}
+  .stage .skills{font-size:13px;margin:6px 0;color:var(--mut)}
+  .stage .skills b{color:var(--ink)}
+  .stage .mess{font-size:12.5px;background:var(--card2);border-radius:8px;padding:8px 11px;margin-top:8px}
+  /* Legenden */
+  .legends{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin:14px 0}
+  details.legend{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  details.legend[open]{grid-column:1/-1;border-color:var(--acc)}
+  details.legend summary{cursor:pointer;padding:13px 15px;list-style:none;display:flex;gap:12px;align-items:center}
+  details.legend summary::-webkit-details-marker{display:none}
+  details.legend summary:hover{background:var(--card2)}
+  .lgAva{width:44px;height:44px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto;border:1px solid var(--line)}
+  .lgName{font-weight:700;font-size:14px;line-height:1.25}
+  .lgSub{font-size:11.5px;color:var(--mut)}
+  .lgBody{padding:2px 17px 15px;font-size:13.5px;border-top:1px solid var(--line)}
+  .lgBody .row{margin:9px 0}
+  .lgBody .k{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--acc);font-weight:700;display:block;margin-bottom:2px}
+  .lgLesson{background:rgba(63,185,80,.09);border-left:3px solid var(--good);border-radius:6px;padding:9px 12px;margin-top:10px}
   @media print{body{background:#fff;color:#111}.status,.fbar{display:none}}
 </style>
 </head>
@@ -245,6 +272,44 @@
     <p style="font-size:13.5px">Dein persönliches Muster laut Daten: Die groben Einsteller passieren mit +3 oder mehr auf dem Brett und über 3 Minuten auf der Uhr – nicht in Zeitnot. Führung macht nachlässig. <b>Gegenmittel:</b> Sobald du klar gewinnst, bewusst LANGSAMER werden: „Gewonnene Stellungen gewinnt man durch Vorsicht."</p>
   </div>
 </div>
+
+<h2>Dein Lernpfad: von hier bis 1000 <span class="sub" id="pathSub">(deine aktuelle Stufe ist markiert – sie wandert mit deinem Rating mit)</span></h2>
+<p class="sub" style="margin-bottom:12px">Jede Stufe beschreibt, was Spieler auf diesem Level im Schnitt noch falsch machen, welche Fähigkeit den Sprung bringt und woran du im Dashboard misst, ob du so weit bist. Faustregel aus der Praxis: Pro Stufe verschwindet EIN Fehlertyp – mehr braucht es nicht.</p>
+
+<div class="stage" data-min="0" data-max="600">
+  <h3><span class="tagb" data-role="tag">Stufe</span> Bis 600 · Überleben lernen</h3>
+  <p><b>Was auf diesem Level Partien entscheidet:</b> Fast jede Partie endet durch eine komplett übersehene Drohung – einzügige Matts, ungedeckte Damen, Figuren, die im Schlagfeld stehen. Eröffnungswissen ist hier völlig egal.</p>
+  <p class="skills"><b>Schlüsselfähigkeiten:</b> Vor jedem Zug einmal fragen „Was droht?" · Rochade in den ersten 10 Zügen · Dame nicht vor Zug 6 bewegen · Grundmatts sicher können (Dame+König, Turm+König).</p>
+  <div class="mess">📏 Messlatte im Dashboard: Rochade-Quote über 60 % · unter 3 Hänger pro Partie.</div>
+</div>
+<div class="stage" data-min="600" data-max="700">
+  <h3><span class="tagb" data-role="tag">Stufe</span> 600 → 700 · Zählen lernen</h3>
+  <p><b>Was 600er im Schnitt falsch machen:</b> Sie schlagen zurück, ohne Angreifer und Verteidiger zu zählen, und tauschen dabei still Material weg. Und sie sehen die EIGENEN Chancen nicht: Auf diesem Level lässt der Gegner pro Partie 1–2 Figuren hängen – wer sie konsequent nimmt, steigt fast automatisch.</p>
+  <p class="skills"><b>Schlüsselfähigkeiten:</b> Abtausch-Bilanz zählen (wer schlägt zuletzt?) · das 3-Fragen-Ritual ab Zug 8 · f7/f2-Überfälle (Schäfermatt-Muster) auswendig abwehren · keine Züge unter 3 Sekunden.</p>
+  <div class="mess">📏 Messlatte: Bestrafungsquote über 65 % · Hänger/100 Züge unter 5,5 · keine Verlustserie über 3. <span class="up">Das sind exakt deine Level-4-Gates oben.</span></div>
+</div>
+<div class="stage" data-min="700" data-max="800">
+  <h3><span class="tagb" data-role="tag">Stufe</span> 700 → 800 · Taktik-Augen öffnen</h3>
+  <p><b>Was 700er im Schnitt falsch machen:</b> Sie sehen nur die lauteste Drohung. Gabeln, Spieße und Abzüge – vor allem Springergabeln auf c7/f7 – entscheiden hier die Mehrheit der Partien, in beide Richtungen. Und: Gewonnene Stellungen werden durch Autopilot wieder hergegeben.</p>
+  <p class="skills"><b>Schlüsselfähigkeiten:</b> Die 5 Grundmotive blind erkennen (Gabel, Spieß, Fesselung, Abzug, überlasteter Verteidiger) · täglich 10–15 Puzzles · in Gewinnstellung bewusst langsamer werden · einfache Bauernendspiele (Quadratregel, Opposition).</p>
+  <div class="mess">📏 Messlatte: Puzzle-Rating über 1200 · Engine-Blunder unter 1,5/Partie · Wendepunkt-Statistik: „verpasste Gewinne" halbieren.</div>
+</div>
+<div class="stage" data-min="800" data-max="900">
+  <h3><span class="tagb" data-role="tag">Stufe</span> 800 → 900 · Den Gegner mitdenken</h3>
+  <p><b>Was 800er im Schnitt falsch machen:</b> Sie rechnen „ich ziehe – er zieht" in Paaren und vergessen Zwischenzüge und Zwischenschachs. Grundreihenmatts schlagen hier brutal zu, und im Endspiel wird der König nicht aktiviert.</p>
+  <p class="skills"><b>Schlüsselfähigkeiten:</b> Vor jedem Abtausch: „Hat er ein Schach oder einen Konter DAZWISCHEN?" · Luftloch-Timing (h3/h6) · König ins Endspiel-Zentrum · eine Eröffnung pro Farbe mit Plan statt fünf ohne.</p>
+  <div class="mess">📏 Messlatte: ACPL unter 80 · Mittelspiel-Fehlerrate unter 6/100 · Endspiel-Score über 50 %.</div>
+</div>
+<div class="stage" data-min="900" data-max="1000">
+  <h3><span class="tagb" data-role="tag">Stufe</span> 900 → 1000 · Pläne statt Züge</h3>
+  <p><b>Was 900er im Schnitt falsch machen:</b> Sie blundern seltener, aber sie ziehen planlos, sobald keine Taktik da ist – Figuren pendeln, Türme stehen passiv, schwache Bauern werden ignoriert. Die 1000 knackt, wer in ruhigen Stellungen eine Idee hat.</p>
+  <p class="skills"><b>Schlüsselfähigkeiten:</b> Nach der Eröffnung einen 3-Züge-Plan formulieren (schwächster gegnerischer Punkt?) · Türme auf offene Linien, Springer auf Vorposten · Zwei-Zug-Kombinationen rechnen · eigene Verlustpartien OHNE Engine zuerst selbst analysieren.</p>
+  <div class="mess">📏 Messlatte: ACPL unter 65 · Accuracy über 78 · Bestrafungsquote über 75 % (Gold-Standard).</div>
+</div>
+
+<h2>Legenden-Bibliothek <span class="sub">(kompakt: Wer waren sie, warum prägen sie bis heute – und was nimmst du mit?)</span></h2>
+<p class="sub" style="margin-bottom:4px">Karte anklicken zum Aufklappen. Chronologisch sortiert – von der Romantik bis heute ist das nebenbei eine kleine Geschichte des Schachdenkens.</p>
+<div class="legends" id="legendGrid"></div>
 
 <h2>Beste & schlechteste Spielzeiten <span class="sub">(Rapid, letzte 60 Tage)</span></h2>
 <div class="card">
@@ -508,6 +573,7 @@ function renderAll(){
     const cls=i<li?"done":(i===li?"now":"");
     return "<div class='rung "+cls+"'><div class='ln'>Level "+(i+1)+(i===li?" · DU":i<li?" ✓":"")+"</div><div class='lt'>"+Lx[2]+"</div><div class='lr'>"+(Lx[1]>=4000?"> 2000":Lx[0]+"–"+Lx[1])+"</div></div>";
   }).join("");
+  markStages(curR);
   // Gates (letzte 14 Tage Rapid)
   const g14=rap.filter(x=>x.d>=dAdd(today,-14));
   const a14=agg(g14);
@@ -1003,6 +1069,114 @@ document.getElementById("tpNext").onclick=()=>showTp(tpIdx+1);
 document.getElementById("tpPlay").onclick=function(){tpPlaying=!tpPlaying;this.textContent=tpPlaying?"Pause":"Abspielen";showTp(tpIdx);};
 document.getElementById("tpDots").addEventListener("click",ev=>{if(ev.target.dataset.i!=null)showTp(parseInt(ev.target.dataset.i,10));});
 
+/* ---------- Lernpfad-Markierung ---------- */
+function markStages(curR){
+  document.querySelectorAll(".stage").forEach(el=>{
+    const min=parseInt(el.dataset.min,10),max=parseInt(el.dataset.max,10);
+    el.classList.remove("done","now","next");
+    const tag=el.querySelector("[data-role=tag]");
+    if(curR>=max){el.classList.add("done");if(tag)tag.textContent="Geschafft ✓";}
+    else if(curR>=min){el.classList.add("now");if(tag)tag.textContent="DU BIST HIER · "+curR;}
+    else {el.classList.add("next");if(tag)tag.textContent="Als Nächstes";}
+  });
+}
+
+/* ---------- Legenden-Bibliothek ---------- */
+const LEGENDS=[
+ {e:"♞",n:"Paul Morphy",y:"1837–1884",c:"USA · aktiv ca. 1850–1859",
+  o:"Anwaltssohn aus New Orleans, lernte als Kind nur durchs Zuschauen bei Vater und Onkel. Mit 12 schlug er einen tourenden europäischen Meister.",
+  k:"Nur rund zwei Jahre auf der Weltbühne: 1857 gewann er den ersten Amerikanischen Kongress, 1858/59 fegte er in Europa alle Größen weg – dann zog er sich mit 22 komplett zurück und spielte nie wieder ernsthaft.",
+  s:"Blitzschnelle Entwicklung, offene Linien, Opfer für Initiative. Seine „Opernpartie“ (Paris 1858, gegen Herzog und Graf in der Logenpause) ist bis heute DIE Lehrpartie für Entwicklung.",
+  w:"Er spielte Prinzipien, die erst Jahrzehnte später formuliert wurden – reines Naturtalent seiner Epoche voraus. Fischer hielt ihn für den vielleicht talentiertesten Spieler aller Zeiten. Tragisch: Das Genie fand nach dem Schach keinen Platz im Leben.",
+  l:"Figuren raus, König in Sicherheit, DANN angreifen. Morphy gewann gegen Meister mit nichts als deinem Stufe-600-Lehrplan – perfekt ausgeführt."},
+ {e:"♜",n:"Wilhelm Steinitz",y:"1836–1900",c:"Österreich/USA · WM 1886–1894",
+  o:"Aus ärmlicher Prager Familie, dreizehntes Kind. Kam über Wien zum Berufsschach, als es diesen Beruf noch kaum gab.",
+  k:"Erst gefürchteter Angriffsspieler („der österreichische Morphy“), dann radikaler Umdenker. 1886 gewann er das erste offizielle WM-Match der Geschichte, hielt den Titel bis 1894. Starb verarmt in New York.",
+  s:"Erfinder des positionellen Schachs: Angriff ist erst berechtigt, wenn man einen Vorteil BESITZT. Kleine Vorteile sammeln, Schwächen provozieren, verteidigen können.",
+  w:"Er machte aus Schach eine Wissenschaft mit Gesetzen statt einem Duell der Kühnheit. Jeder Positionsspieler seit 140 Jahren – von Capablanca bis Carlsen – steht auf seinem Fundament.",
+  l:"Greif nicht an, weil dir danach ist – greif an, wenn die Stellung es erlaubt. Dein Wendepunkt-Kino zeigt dir, was passiert, wenn man diese Regel bricht."},
+ {e:"♚",n:"Emanuel Lasker",y:"1868–1941",c:"Deutschland · WM 1894–1921",
+  o:"Pfarrerssohn aus Berlinchen, promovierter Mathematiker und Philosoph – Schach war für ihn ein Kampf zweier Menschen, nicht zweier Stellungen.",
+  k:"27 Jahre Weltmeister – bis heute unerreichter Rekord. Schlug Steinitz 1894, verteidigte gegen eine ganze Generation und blieb bis ins hohe Alter Weltklasse (Platz 3 in Moskau 1935 mit 66!). Floh 1933 vor den Nazis.",
+  s:"Der erste Schach-Psychologe: Er wählte nicht den objektiv besten, sondern den für DIESEN Gegner unangenehmsten Zug und verteidigte hoffnungslos wirkende Stellungen mit zäher Präzision.",
+  w:"Er bewies, dass Schach ein Kampfspiel ist, in dem Nerven, Ausdauer und Menschenkenntnis zählen. Moderne Profis, die „praktische Entscheidungen“ treffen, spielen Lasker-Schach.",
+  l:"Verlorene Stellung heißt nicht verlorene Partie. Auf deinem Level dreht zäher Widerstand jede dritte „tote“ Stellung – der Gegner blundert auch."},
+ {e:"♝",n:"José Raúl Capablanca",y:"1888–1942",c:"Kuba · WM 1921–1927",
+  o:"Diplomatenkind aus Havanna, lernte mit vier Jahren die Regeln, indem er seinem Vater zusah – und wies ihm sofort einen Regelverstoß nach.",
+  k:"„Die Schachmaschine“: Von 1916 bis 1924 verlor er acht Jahre lang keine einzige Turnierpartie. WM 1921 ohne Partieverlust gegen Lasker. Verlor den Titel 1927 überraschend an Aljechin und bekam nie eine Revanche.",
+  s:"Müheloser, klarer, fehlerfreier Stil. Er vereinfachte Stellungen und gewann Endspiele, in denen andere nicht einmal einen Vorteil sahen. Kaum Eröffnungsstudium – pures Verständnis.",
+  w:"Bis heute die Referenz für Technik und Endspielkunst; Carlsen nennt ihn als Vorbild. Sein Diktum „Studiert Endspiele zuerst“ ist der meistzitierte Trainingsrat der Geschichte.",
+  l:"Einfach schlägt spektakulär. Wenn du vorne liegst: tauschen, vereinfachen, Endspiel gewinnen – statt Kombinationen zu suchen, die es nicht gibt."},
+ {e:"♛",n:"Alexander Aljechin",y:"1892–1946",c:"Russland/Frankreich · WM 1927–35, 1937–46",
+  o:"Moskauer Adelsfamilie; spielte als Junge Blindschach im Internat unter der Bettdecke. Verließ Russland nach der Revolution.",
+  k:"Entthronte 1927 in Buenos Aires den „unbesiegbaren“ Capablanca – durch monatelange, damals beispiellose Vorbereitung. Verlor den Titel 1935 an Euwe (auch am Alkohol), holte ihn 1937 diszipliniert zurück und starb 1946 als amtierender Weltmeister – als Einziger je.",
+  s:"Wütende, tiefe Kombinationen aus scheinbar ruhigen Stellungen. Dazu der erste Profi, der Gegner systematisch analysierte und Eröffnungen als Waffe präparierte.",
+  w:"Er bewies, dass Arbeit Talent schlagen kann – sein Sieg über Capablanca ist das ewige Beispiel dafür, dass Vorbereitung Weltmeister macht. Die sowjetische Schule erklärte ihn zum Urvater.",
+  l:"Dein Gegner ist schlagbar, egal wie überlegen er wirkt – wenn du dich vorbereitest. Deine Caro-Kann-Bank ist genau so eine Aljechin-Waffe: schmal, aber tief."},
+ {e:"♖",n:"Michail Botwinnik",y:"1911–1995",c:"UdSSR · WM 1948–57, 58–60, 61–63",
+  o:"Elektroingenieur aus St. Petersburg, kam „spät“ mit 12 zum Schach – und holte auf durch Methode statt Wunderkind-Talent.",
+  k:"Dreimal Weltmeister, zweimal nach Titelverlust zurückgekommen (kann sonst kaum jemand). Baute nebenbei eine echte Ingenieurskarriere und später die legendäre Botwinnik-Schule.",
+  s:"Wissenschaftliches Schach: eiserne Eröffnungssysteme, strategische Klarheit, brutale Selbstanalyse. Er veröffentlichte die Analysen der eigenen Fehler – undenkbar für seine Zeit.",
+  w:"Der Vater der sowjetischen Schule, die 50 Jahre lang fast alle Weltmeister stellte. Seine Schüler: Karpow, Kasparow, Kramnik. Sein Kernsatz: „Schach lernt man durch das Analysieren der eigenen Partien.“",
+  l:"Du machst mit ErtuCoach exakt Botwinnik-Training: eigene Fehler messen statt fremde Videos schauen. Sein Weg beweist, dass Methode den Spätstarter nach oben trägt."},
+ {e:"♘",n:"Michail Tal",y:"1936–1992",c:"Lettland (UdSSR) · WM 1960–1961",
+  o:"Rigaer Arztfamilie; hochbegabt, kränklich, unwiderstehlich charmant. Mit 23 jüngster Weltmeister seiner Zeit.",
+  k:"Stürmte 1960 am Brett Botwinnik nieder, verlor die Revanche 1961 schon schwer nierenkrank. Blieb trotz lebenslanger Krankheit 30 Jahre Weltspitze – mit 86 und 95 Partien die längsten Ungeschlagen-Serien der Geschichte. Ausgerechnet der Zocker!",
+  s:"„Der Magier von Riga“: intuitive Opfer, die objektiv nicht immer korrekt waren – aber am Brett niemand widerlegen konnte. „Es gibt zwei Arten von Opfern: korrekte und meine.“",
+  w:"Tal ist der ewige Beweis, dass Schach Kunst und Mut ist, nicht nur Rechnen. Jeder Angriffsspieler und jeder Streamer, der „für die Galerie“ opfert, zitiert ihn – und die Liebe des Publikums gehörte immer ihm.",
+  l:"Initiative hat realen Wert: Ein Gegner unter Dauerdruck blundert doppelt so oft. Auf deinem Level gewinnt der Aktivere – auch mal einen Bauern für Tempo geben."},
+ {e:"♔",n:"Tigran Petrosjan",y:"1929–1984",c:"Armenien (UdSSR) · WM 1963–1969",
+  o:"Früh verwaister Hausmeisterssohn aus Tiflis, der sich mit Straßenkehren das erste Schachbuch verdiente.",
+  k:"Weltmeister 1963–1969, davor und danach jahrzehntelang fast unbesiegbar in Kandidatenzyklen. In Turnieren der am schwersten zu schlagende Spieler seiner Ära.",
+  s:"„Eiserner Tigran“: Prophylaxe – er sah die Pläne des Gegners früher als der Gegner selbst und erstickte sie, bevor sie existierten. Berühmt für Qualitätsopfer zur Festungsbildung.",
+  w:"Er machte Verteidigung und Vorbeugung zur hohen Kunst. Carlsens berühmte Geduld und das moderne „Was will mein Gegner?“ vor jedem Zug sind pures Petrosjan-Erbe.",
+  l:"Die stärkste Frage auf jedem Level: „Was hat SEIN letzter Zug vor?“ Beantworte sie jeden Zug, und du eliminierst die Hälfte deiner Kollaps-Wendepunkte."},
+ {e:"♗",n:"Bobby Fischer",y:"1943–2008",c:"USA · WM 1972–1975",
+  o:"Aufgewachsen in Brooklyn bei alleinerziehender Mutter; mit 6 Schach aus einem Süßwarenladen-Set gelernt, mit 13 die „Partie des Jahrhunderts“, mit 15 jüngster Großmeister der damaligen Geschichte.",
+  k:"1970/71 die brutalste Serie aller Zeiten: 20 Siege in Folge gegen Weltklasse, darunter 6:0 gegen Taimanow UND 6:0 gegen Larsen. 1972 in Reykjavík das „Match des Jahrhunderts“ gegen Spasski – Kalter Krieg am Brett, ein Mann gegen die sowjetische Maschinerie. Verteidigte den Titel nie, verschwand, tragisches Spätleben im Exil, gestorben 2008 in Island.",
+  s:"Kompromisslose Präzision und Wahrheitssuche: keine Remis-Absprachen, jede Partie bis zum Ende ausgekämpft. Sein Buch „My 60 Memorable Games“ gilt als ehrlichstes Schachbuch überhaupt – er analysierte die eigenen Fehler schonungslos.",
+  w:"Fischer bewies, dass ein Einzelner mit Arbeitsbesessenheit ein ganzes System schlagen kann – 10–14 Stunden Studium am Tag, jahrelang. Er löste den ersten weltweiten Schachboom aus, erfand Chess960 und den modernen Profianspruch (Preisgelder, Bedingungen). Fast jeder heutige Top-GM nennt ihn als Initialfunken.",
+  l:"Nimm jede Partie ernst und suche die Wahrheit der Stellung – nicht den bequemen Zug. Dein „Kontrollblick vor jedem Zug“ ist Fischer im Kleinformat. Und: Genie ohne Balance zerbricht – Schach soll dein Leben bereichern, nicht ersetzen."},
+ {e:"♙",n:"Anatoli Karpow",y:"*1951",c:"UdSSR/Russland · WM 1975–1985",
+  o:"Arbeiterkind aus Slatoust im Ural, mit 4 gelernt, Botwinnik-Schüler („Der Junge hat keine Ahnung von Schach“ – Botwinniks berühmtester Irrtum).",
+  k:"Weltmeister 1975 (kampflos, als Fischer nicht antrat) – und bewies dann zehn Jahre lang, dass er es auch so verdient hätte: über 160 Turniersiege, mehr als jeder andere Mensch. Fünf epische WM-Kämpfe gegen Kasparow.",
+  s:"„Boa constrictor“: kleine Vorteile greifen, jedes Gegenspiel ersticken, den Gegner langsam bewegungsunfähig drücken. Keine Show – nur unerbittliche Effizienz.",
+  w:"Das Lehrbuch dafür, wie man MIT einem Vorteil umgeht: nicht stürmen, sondern verwerten. Positionsspieler weltweit lernen Verwertungstechnik anhand seiner Partien.",
+  l:"Dein Autopilot-Problem in Gewinnstellung ist die Anti-Karpow-Krankheit: Wenn du vorne bist, spiele langsamer, nimm dem Gegner JEDE aktive Idee – der Rest gewinnt sich selbst."},
+ {e:"♕",n:"Garri Kasparow",y:"*1963",c:"Aserbaidschan (UdSSR)/Russland · WM 1985–2000",
+  o:"Aus Baku, früh vom Vater verwaist, von der Mutter kompromisslos gefördert, Botwinnik-Schüler und dessen erklärter Liebling.",
+  k:"1985 mit 22 jüngster Weltmeister aller Zeiten – nach zwei Marathon-Matches gegen Karpow. 20 Jahre lang Nummer 1 der Welt (1984–2005), Rekord-Elo 2851, die 1997 verlorene Partie gegen Deep Blue wurde zum Symbol der Maschinen-Ära. Rücktritt 2005 auf dem Gipfel.",
+  s:"Dynamisches Maximum: Eröffnungsvorbereitung wie ein Forschungslabor, dann Initiative um jeden Preis. Seine Neuerungen entschieden Partien, bevor sie begannen.",
+  w:"Er professionalisierte Vorbereitung endgültig und wurde nach der Karriere zum wichtigsten Schach-Erklärer („Meine großen Vorkämpfer“). Der Umgang der heutigen Generation mit Engines als Trainingspartner beginnt bei seiner Deep-Blue-Geschichte.",
+  l:"Eröffnung heißt nicht Auswendiglernen, sondern einen Plan besitzen. Deine zwei Eröffnungen (Caro-Kann, Wiener) mit IDEEN zu verstehen ist Kasparow-Prinzip auf 600er-Niveau."},
+ {e:"♟",n:"Judit Polgár",y:"*1976",c:"Ungarn · aktiv 1988–2014",
+  o:"Das berühmteste Erziehungsexperiment der Schachgeschichte: Vater László wollte beweisen, dass „Genies gemacht werden“ – seine drei Töchter wurden zu Hause unterrichtet, Schach als Hauptfach. Judit, die Jüngste, wurde die Stärkste.",
+  k:"Mit 15 jüngste Großmeisterin der Geschichte (brach Fischers Rekord). Einzige Frau je in den Top 10 (Platz 8, 2005). Schlug im Laufe der Karriere Kasparow, Karpow, Anand, Topalow und Carlsen. Spielte nie um den Frauen-WM-Titel – aus Prinzip nur gegen die Besten.",
+  s:"Furchtloses, taktisch glühendes Angriffsschach – ihre Königsangriffe gehören in jede Kombinationssammlung.",
+  w:"Sie zerstörte den Mythos, Weltklasse sei eine Frage von Talent oder Geschlecht: 5–6 Stunden strukturierte Arbeit täglich von Kindheit an. Jede Diskussion über „Training schlägt Talent“ endet bei den Polgár-Schwestern.",
+  l:"Dein Rating ist eine Funktion deiner Trainingsstruktur, nicht deiner Gene. Der Wochenplan im Dashboard IST der Polgár-Ansatz – nur eben 30 Minuten statt 6 Stunden."},
+ {e:"♞",n:"Magnus Carlsen",y:"*1990",c:"Norwegen · WM 2013–2023",
+  o:"Aus Tønsberg; als Kind Gedächtnisphänomen (kannte mit 5 alle Länder und Hauptstädte), Großmeister mit 13, „Mozart des Schachs“.",
+  k:"Weltmeister 2013–2023, gab den Titel freiwillig ab („keine Motivation mehr“) und blieb trotzdem die Nummer 1. Höchste Elo aller Zeiten (2882), dazu Weltmeistertitel in Rapid und Blitz in Serie.",
+  s:"Universell und wasserdicht – seine Superkraft: „tote“ Remis-Stellungen stundenlang auszupressen, bis der Gegner am Zug 70 den einen Fehler macht. Endspieltechnik auf nie gesehenem Niveau.",
+  w:"Er hat die Engine-Generation geprägt: Es zählt nicht die auswendig gelernte Variante, sondern wer aus JEDER Stellung mehr Probleme stellt. Dazu machte er Schach über Streams, Apps und Fantasy-Formate zum Massenphänomen.",
+  l:"Partien werden nicht in der Eröffnung gewonnen, sondern in Zug 30–60 von dem, der wach bleibt. Deine 178-Züge-Remis-Partie war ein Carlsen-Moment – solche Zähigkeit zahlt auf jedem Level."}
+];
+function renderLegends(){
+  const el=document.getElementById("legendGrid");
+  if(!el)return;
+  el.innerHTML=LEGENDS.map(L=>
+    "<details class='legend'><summary><div class='lgAva'>"+L.e+"</div><div><div class='lgName'>"+L.n+"</div><div class='lgSub'>"+L.y+" · "+L.c+"</div></div></summary>"+
+    "<div class='lgBody'>"+
+    "<div class='row'><span class='k'>Ursprung</span>"+L.o+"</div>"+
+    "<div class='row'><span class='k'>Karriere</span>"+L.k+"</div>"+
+    "<div class='row'><span class='k'>Stil & Superkraft</span>"+L.s+"</div>"+
+    "<div class='row'><span class='k'>Warum bis heute prägend</span>"+L.w+"</div>"+
+    "<div class='lgLesson'><span class='k' style='color:var(--good)'>Deine Lektion</span>"+L.l+"</div>"+
+    "</div></details>").join("");
+}
+
+renderLegends();
 renderAll();
 status("Letzter Stand geladen ("+C.rows.length+" Partien) – prüfe auf neue …","busy");
 update();
